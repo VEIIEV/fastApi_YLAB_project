@@ -18,6 +18,9 @@ poetry update
 ~~~
  uvicorn python_code.main:app  --reload
 ~~~
-
-пользоваться endpoint'ами 
+* при запуске сервера бд очищается и создается заново
+Если необходимо изменить поведение, то измените функцию  init_db по пути python_code.db 
+* пользоваться endpoint'ами 
 ![image](https://github.com/VEIIEV/fastApi_YLAB_project/assets/62066130/e666d4c9-ffa8-499c-addd-8528d9e5ef45)
+
+
