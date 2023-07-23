@@ -4,10 +4,10 @@
 * Для запуска требуется создать в основной дериктории проекта .env со следубщим содержимым
 ```
 # PostgreSQL
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=1234
-POSTGRES_SERVER=localhost
-POSTGRES_DB=ylab
+POSTGRES_USER= user
+POSTGRES_PASSWORD= password
+POSTGRES_SERVER= server
+POSTGRES_DB= db_name
 ```
 * Подключить зависимости при помощи poetry
 ```
