@@ -32,6 +32,11 @@ async def root():
     return {"message": "Hello World"}
 
 
+@app.get("/ping/{value}")
+def ping(value: str):
+    return {"value": value}
+
+
 @app.get("/hello/{name}")
 async def say_hello(name: str):
     return {"message": f"Hello {name}"}
@@ -47,7 +52,7 @@ def check_dish_existence(title: Annotated[str, Path(title="The ID of the item to
 def delete_later(session: Session = Depends(get_session)):
     menus = python_code.cruds.menu_crud.get_menu_all(session)
     for elem in menus:
-        elem[0]='dicpic'
+        elem[0] = 'dicpic'
     return menus
 # пути к меню
 
