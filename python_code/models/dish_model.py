@@ -15,7 +15,7 @@ class Dish(Base):
     id: orm.Mapped[UUID] = orm.mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     title: orm.Mapped[str] = orm.mapped_column(String, unique=True)
     description: orm.Mapped[str] = orm.mapped_column(String)
-    price: orm.Mapped[decimal.Decimal] = orm.mapped_column(DECIMAL)
+    price: orm.Mapped[decimal.Decimal] = orm.mapped_column(DECIMAL(precision=2))
     submenu_id: orm.Mapped[int] = orm.mapped_column(UUID(as_uuid=True), sa.ForeignKey('submenu.id', ondelete='CASCADE'))
 
     submenu: orm.Mapped["Submenu"] = orm.relationship("Submenu", back_populates='dishes')
