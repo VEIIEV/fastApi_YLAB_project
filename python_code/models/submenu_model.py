@@ -13,7 +13,7 @@ class Submenu(Base):
     __tablename__ = 'submenu'
 
     id: orm.Mapped[UUID] = orm.mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    title: orm.Mapped[str] = orm.mapped_column(String, unique=True)
+    title: orm.Mapped[str] = orm.mapped_column(String)
     description: orm.Mapped[str] = orm.mapped_column(String)
     menu_id: orm.Mapped[UUID] = orm.mapped_column(UUID(as_uuid=True), sa.ForeignKey("menu.id", ondelete='CASCADE'))
 

@@ -1,3 +1,5 @@
+import decimal
+
 from fastapi import APIRouter
 import uuid
 from typing import Annotated
@@ -18,6 +20,7 @@ router = APIRouter(tags=['dish'],
 def round_price(dish: DishSchema):
     "brings the price to  x.xx format"
     dish.price = format(dish.price, '.2f')
+
 
 @router.get('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes')
 def get_all_dishes(api_test_submenu_id: uuid.UUID, session: Session = Depends(get_session)):
@@ -42,7 +45,11 @@ def get_dish_by_id(api_test_dish_id: uuid.UUID, session: Session = Depends(get_s
 def create_dish(api_test_submenu_id: uuid.UUID,
                 dish: CreateDish,
                 session: Session = Depends(get_session)):
+    print(dish.price)
+    dish.price = decimal.Decimal(dish.price)
+    print(dish.price)
     dish = DC.create_dish(api_test_submenu_id, dish, session)
+    print(dish.price)
     round_price(dish)
     return dish
 
