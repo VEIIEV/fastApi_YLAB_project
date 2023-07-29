@@ -17,11 +17,6 @@ from requests import Response
 #     assert ob.__str__() == {"message": "Hello World"}
 
 
-@pytest.fixture(scope='session')
-def get_host():
-    yield 'http://localhost:8000'
-
-
 @pytest.fixture(scope='function')
 def create_menu_for_test(get_host):
     url = get_host + '/api/v1/menus'

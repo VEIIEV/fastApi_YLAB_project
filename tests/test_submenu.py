@@ -8,11 +8,6 @@ from requests import Response
 MENU = None
 
 
-@pytest.fixture(scope='session')
-def get_host():
-    yield 'http://localhost:8000'
-
-
 @pytest.fixture()
 def create_menu_for_test(get_host):
     global MENU
