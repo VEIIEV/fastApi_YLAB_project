@@ -10,7 +10,7 @@ load_dotenv(dotenv_path=env_path)
 class Settings:
     POSTGRES_USER: str = os.getenv('POSTGRES_USER')
     POSTGRES_PASSWORD: str = os.getenv('POSTGRES_PASSWORD')
-    POSTGRES_SERVER: str = os.getenv('POSTGRES_SERVER')
+    POSTGRES_SERVER: str = os.getenv('POSTGRES_SERVER_FOR_APP')
     POSTGRES_DB: str = os.getenv('POSTGRES_DB')
 
     DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}/{POSTGRES_DB}"
