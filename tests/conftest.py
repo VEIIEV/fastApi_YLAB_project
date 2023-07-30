@@ -1,5 +1,5 @@
 import pytest
 @pytest.fixture(scope='session')
 def get_host():
-    yield 'http://localhost:8000'
+    yield 'http://host.docker.internal:8000'
 

@@ -11,7 +11,7 @@ COPY ./tests .
 
 # Install dependencies
 
-RUN pip install pytest requests
+RUN pip install pytest requests python-dotenv
 
 # Run pytest when the container launches
 

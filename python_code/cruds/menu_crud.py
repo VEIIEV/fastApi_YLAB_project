@@ -3,15 +3,16 @@ import uuid
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import Session
-
 from python_code.models.dish_model import Dish
 from python_code.models.menu_model import Menu
 from python_code.models.submenu_model import Submenu
 from python_code.schemas.menu_schemas import MenuSchema, CreateMenu
 
 
+
 def get_menu_all(session: Session):
     result = session.execute(sa.select(Menu))
+
     return result.scalars().all()
 
 
