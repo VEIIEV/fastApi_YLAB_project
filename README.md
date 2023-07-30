@@ -16,19 +16,23 @@
 ![img.png](img.png)
 
 # 2) Запуск без docker'а 
+* почему-то .env-non-dev  не отрабатывает В .yaml файле, поэтому придётся поработать с .env файлом
 * Для запуска требуется отредактировать .env файл в основной дериктории проекта, указав следующие содержание
 ```
 # PostgreSQL
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=1234
 POSTGRES_DB=ylab
-# для запуска на пк без использования докера
-POSTGRES_SERVER_FOR_APP=127.0.0.1
-# для сборки докер образа 
+
+# load on pc withoit docker
+# POSTGRES_SERVER=127.0.0.1
+# load with docker
 POSTGRES_SERVER=db
 
+# test with docker
+HOST_FOR_TEST=app
 # test without docker
-HOST_FOR_TEST=127.0.0.1
+# HOST_FOR_TEST=127.0.0.1
 ```
 * Подключить зависимости при помощи poetry
 ```
