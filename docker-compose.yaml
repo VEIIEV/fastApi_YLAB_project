@@ -1,6 +1,4 @@
-version: "3.7"
 
-services:
 version: "3.7"
 
 services:
@@ -13,11 +11,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
-      interval: 3s
-      timeout: 30s
-      retries: 3
+      - POSTGRES_SERVER=${POSTGRES_SERVER}
 
   app:
     build:
@@ -30,13 +24,17 @@ services:
       - "8000:8000"
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_started
 
   pytest:
     build:
       context: .
       dockerfile: Dockerfile-tests
     container_name: tests
+    env_file:
+      - .env
+    environment:
+      - HOST_FOR_TEST=${HOST_FOR_TEST}
     depends_on:
       app:
         condition: service_started
