@@ -4,7 +4,7 @@
 # 1) Запуск с помощью docker-compose
 
 * Выполнить команду "docker-compose up -d"
-* ВЫполнить команду  "docker run fastapiproject1-pytest"
+* Выполнить команду  "docker run fastapiproject1-pytest"
 
 Пример работы PyTest
 ![img.png](img.png)
