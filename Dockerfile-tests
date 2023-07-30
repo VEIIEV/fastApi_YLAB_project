@@ -1,0 +1,18 @@
+# Install python
+FROM python:3.10-slim
+
+# Set working directory
+WORKDIR /test
+
+# Copy project
+COPY ./tests .
+
+
+
+# Install dependencies
+
+RUN pip install pytest requests
+
+# Run pytest when the container launches
+
+ENTRYPOINT ["pytest"]

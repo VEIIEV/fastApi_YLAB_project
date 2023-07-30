@@ -14,10 +14,21 @@ services:
   app:
     build:
       context: .
-    container_name: ylab_fastApi_app
+      dockerfile: Dockerfile
+    container_name: ylab_fastApi_app_with_tests
     env_file:
       - .env-non-dev
     ports:
       - 8000:8000
     depends_on:
       - db
+
+  pytest:
+    build:
+      context: .
+      dockerfile: Dockerfile-tests
+    depends_on:
+      db:
+        condition: service_started
+      app:
+        condition: service_started
