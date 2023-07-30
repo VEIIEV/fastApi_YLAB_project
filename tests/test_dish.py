@@ -9,7 +9,7 @@ MENU = None
 SUBMENU = None
 
 
-@pytest.fixture()
+@pytest.fixture(scope='module')
 def create_menu_for_test(get_host):
     global MENU
     if MENU:
@@ -22,10 +22,12 @@ def create_menu_for_test(get_host):
         }
         response: Response = requests.post(url=url, json=body)
         MENU = response.json()
-        return response.json()
+        yield MENU
+        url = url + '/' + MENU['id']
+        requests.delete(url)
 
 
-@pytest.fixture()
+@pytest.fixture(scope='module')
 def create_submenu_for_test(get_host, create_menu_for_test):
     global SUBMENU
     if SUBMENU:
@@ -38,7 +40,10 @@ def create_submenu_for_test(get_host, create_menu_for_test):
             "description": "My submenu description 1"
         }
         response: Response = requests.post(url=url, json=body)
-    return response.json()
+        SUBMENU = response.json()
+    yield SUBMENU
+    url = url + '/' + SUBMENU['id']
+    requests.delete(url)
 
 
 @pytest.fixture()
