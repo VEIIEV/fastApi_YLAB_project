@@ -32,14 +32,14 @@ POSTGRES_PASSWORD=1234
 POSTGRES_DB=ylab
 
 # load on pc withoit docker
-# POSTGRES_SERVER=127.0.0.1
+DOSTGRES_SERVER=127.0.0.1
 # load with docker
-POSTGRES_SERVER=db
+# POSTGRES_SERVER=db
 
 # test with docker
-HOST_FOR_TEST=app
+# HOST_FOR_TEST=app
 # test without docker
-# HOST_FOR_TEST=127.0.0.1
+HOST_FOR_TEST=127.0.0.1
 ```
 * Подключить зависимости при помощи poetry
 ```
