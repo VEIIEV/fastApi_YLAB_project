@@ -7,14 +7,10 @@ from sqlalchemy.orm import Session
 from python_code.cruds import dish_crud as DC
 from python_code.db import get_session
 from python_code.schemas.dish_schemas import CreateDish, DishSchema
+from python_code.utils import round_price
 
 router = APIRouter(tags=['dish'],
                    responses={404: {'details': 'dish not found'}})
-
-
-def round_price(dish: DishSchema):
-    'brings the price to  x.xx format'
-    dish.price = format(dish.price, '.2f')
 
 
 @router.get('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes')

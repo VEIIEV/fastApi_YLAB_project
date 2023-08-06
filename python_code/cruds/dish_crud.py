@@ -8,11 +8,6 @@ from python_code.models.dish_model import Dish
 from python_code.schemas.dish_schemas import CreateDish, DishSchema
 
 
-def round_price(dish: Dish):
-    'brings the price to  x.xx format'
-    dish.price = format(dish.price, '.2f')
-
-
 def get_dish_all(session: Session) -> Sequence[Dish]:
     result = session.execute(sa.select(Dish))
     return result.scalars().all()
