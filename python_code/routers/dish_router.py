@@ -2,6 +2,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path
+from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
 
 from python_code.cruds import dish_crud as DC
@@ -15,7 +16,7 @@ router = APIRouter(tags=['dish'],
 
 @router.get('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes')
 def get_all_dishes(api_test_submenu_id: uuid.UUID, session: Session = Depends(get_session)):
-    dishes = DC.get_dish_for_submenu_all(api_test_submenu_id, session)
+    dishes: Sequence[DishSchema] = DC.get_dish_for_submenu_all(api_test_submenu_id, session)
     if dishes:
         for dish in dishes:
             round_price(dish)
@@ -51,9 +52,9 @@ def update_dish(api_test_submenu_id: uuid.UUID,
                 session: Session = Depends(get_session)):
     dish_id = DC.update_dish_by_id(api_test_submenu_id, api_test_dish_id, dish, session)
     if dish_id:
-        dish = DC.get_dish_by_id(dish_id, session)
-        round_price(dish)
-        return dish
+        updated_dish: DishSchema | None = DC.get_dish_by_id(dish_id, session)
+        round_price(updated_dish)
+        return updated_dish
     else:
         raise HTTPException(status_code=404, detail='dish not found')
 

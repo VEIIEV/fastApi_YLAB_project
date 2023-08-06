@@ -1,3 +1,4 @@
+import sqlalchemy
 import sqlalchemy as sa
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -35,7 +36,7 @@ class Base(DeclarativeBase):
 
 # используется как зависимости, для создания сессии с бд
 async def get_session():
-    session = Session()
+    session: sqlalchemy.orm.Session = Session()
     try:
         yield session
     except Exception as e:

@@ -3,9 +3,10 @@ from python_code.cruds import submenu_crud as SC
 from python_code.schemas.dish_schemas import DishSchema
 
 
-def round_price(dish: DishSchema) -> None:
+def round_price(dish: DishSchema | None) -> None:
     'brings the price to  x.xx format'
-    dish.price = format(dish.price, '.2f')
+    if dish:
+        dish.price = format(dish.price, '.2f')
 
 
 def add_dish_number_to_submenu(session, submenu) -> None:

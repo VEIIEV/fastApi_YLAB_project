@@ -20,7 +20,7 @@ def get_submenu_by_id(id: uuid.UUID, session: Session) -> SubmenuSchema | None:
     return result.scalar()
 
 
-def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu, session: Session) -> SubmenuSchema:
+def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu, session: Session) -> SubmenuSchema | None:
     created_submenu = session.execute(sa.insert(Submenu).returning(Submenu),
                                       [{'title': submenu.title,
                                         'description': submenu.description,
@@ -40,7 +40,7 @@ def update_submenu_by_id(menu_id: uuid.UUID, submenu_id: uuid.UUID, submenu: Cre
     return updated_submenu.scalar()
 
 
-def delete_submenu_by_id(id: uuid.UUID, session: Session) -> SubmenuSchema:
+def delete_submenu_by_id(id: uuid.UUID, session: Session) -> SubmenuSchema | None:
     deleted_submenu = session.execute(sa.delete(Submenu).returning(Submenu).where(Submenu.id == id))
     session.commit()
     return deleted_submenu.scalar()

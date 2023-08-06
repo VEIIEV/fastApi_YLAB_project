@@ -47,10 +47,10 @@ def get_submenu_by_id(api_test_submenu_id: uuid.UUID,
 def create_submenu(api_test_menu_id: uuid.UUID,
                    submenu: CreateSubmenu,
                    session: Session = Depends(get_session)):
-    submenu = SC.create_submenu(api_test_menu_id, submenu, session)
-    if submenu:
-        add_dish_number_to_submenu(session, submenu)
-    return submenu
+    created_submenu: SubmenuSchema | None = SC.create_submenu(api_test_menu_id, submenu, session)
+    if created_submenu:
+        add_dish_number_to_submenu(session, created_submenu)
+    return created_submenu
 
 
 @router.patch('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}')

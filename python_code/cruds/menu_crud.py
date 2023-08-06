@@ -1,4 +1,5 @@
 import uuid
+from typing import Sequence
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
@@ -10,25 +11,25 @@ from python_code.models.submenu_model import Submenu
 from python_code.schemas.menu_schemas import CreateMenu, MenuSchema
 
 
-def get_menu_all(session: Session):
+def get_menu_all(session: Session) -> Sequence[Menu]:
     result = session.execute(sa.select(Menu))
 
     return result.scalars().all()
 
 
-def get_menu_by_id(id: uuid.UUID, session: Session) -> MenuSchema:
+def get_menu_by_id(id: uuid.UUID, session: Session) -> MenuSchema | None:
     result = session.execute(sa.select(Menu).where(Menu.id == id))
     return result.scalar()
 
 
-def create_menu(menu: CreateMenu, session: Session) -> MenuSchema:
+def create_menu(menu: CreateMenu, session: Session) -> MenuSchema | None:
     created_menu = session.execute(sa.insert(Menu).returning(Menu),
                                    [{'title': menu.title, 'description': menu.description}])
     session.commit()
     return created_menu.scalar()
 
 
-def update_menu_by_id(menu_id: uuid.UUID, menu: CreateMenu, session: Session) -> uuid.UUID:
+def update_menu_by_id(menu_id: uuid.UUID, menu: CreateMenu, session: Session) -> uuid.UUID | None:
     updated_menu = session.connection().execute(
         sa.update(Menu).where(Menu.id == menu_id).returning(Menu),
         [{'title': menu.title, 'description': menu.description}])
@@ -36,7 +37,7 @@ def update_menu_by_id(menu_id: uuid.UUID, menu: CreateMenu, session: Session) ->
     return updated_menu.scalar()
 
 
-def delete_menu_by_id(id: uuid.UUID, session: Session) -> MenuSchema:
+def delete_menu_by_id(id: uuid.UUID, session: Session) -> MenuSchema | None:
     deleted_menu = session.execute(sa.delete(Menu).returning(Menu).where(Menu.id == id))
     session.commit()
     return deleted_menu.scalar()

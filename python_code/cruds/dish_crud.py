@@ -8,17 +8,17 @@ from python_code.models.dish_model import Dish
 from python_code.schemas.dish_schemas import CreateDish, DishSchema
 
 
-def get_dish_all(session: Session) -> Sequence[Dish]:
+def get_dish_all(session: Session) -> Sequence[DishSchema]:
     result = session.execute(sa.select(Dish))
     return result.scalars().all()
 
 
-def get_dish_for_submenu_all(submenu_id: uuid.UUID, session: Session):
+def get_dish_for_submenu_all(submenu_id: uuid.UUID, session: Session) -> Sequence[DishSchema]:
     result = session.execute(sa.select(Dish).where(Dish.submenu_id == submenu_id))
     return result.scalars().all()
 
 
-def get_dish_by_id(id: uuid.UUID, session: Session) -> DishSchema:
+def get_dish_by_id(id: uuid.UUID, session: Session) -> DishSchema | None:
     result = session.execute(sa.select(Dish).where(Dish.id == id))
     return result.scalar()
 
@@ -42,7 +42,7 @@ def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: Session) -> Di
     return result.scalar()
 
 
-def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish, session: Session):
+def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish, session: Session) -> uuid.UUID | None:
     result = session.connection().execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish),
                                           [{'title': dish.title,
                                             'description': dish.description,
@@ -52,7 +52,7 @@ def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDis
     return result.scalar()
 
 
-def delete_dish_by_id(id: uuid.UUID, session: Session) -> DishSchema:
+def delete_dish_by_id(id: uuid.UUID, session: Session) -> DishSchema | None:
     result = session.execute(sa.delete(Dish).returning(Dish).where(Dish.id == id))
     session.commit()
     return result.scalar()
