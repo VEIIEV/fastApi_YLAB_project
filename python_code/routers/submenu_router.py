@@ -1,30 +1,32 @@
 import uuid
 
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
 from python_code.db import get_session
-from python_code.schemas.submenu_schemas import CreateSubmenu
-
-router = APIRouter(
-    tags=["submenu"],
-    responses={404: {"details": "Submenu not found"}},
+from python_code.schemas.submenu_schemas import (
+    BaseSubmenu,
+    CreateSubmenu,
+    SubmenuSchema,
 )
 
-
-
+router = APIRouter(
+    tags=['submenu'],
+    responses={404: {'details': 'Submenu not found'}},
+)
 
 
 @router.get('/api/v1/menus/{api_test_menu_id}/submenus')
 def get_all_submenu(api_test_menu_id: uuid.UUID, session: Session = Depends(get_session)):
     menu = MC.get_menu_by_id(api_test_menu_id, session)
     if menu:
-        submenu = menu.submenu
-        for elem in submenu:
-            dishes_count = SC.count_dishes(elem.id, session)
-            elem.__setattr__('dishes_count', dishes_count)
+        submenu: list[BaseSubmenu] | None = menu.submenu
+        if submenu:
+            for elem in submenu:
+                dishes_count = SC.count_dishes(elem.id, session)
+                elem.__setattr__('dishes_count', dishes_count)
     else:
         return []
     return submenu
@@ -33,12 +35,12 @@ def get_all_submenu(api_test_menu_id: uuid.UUID, session: Session = Depends(get_
 @router.get('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}')
 def get_submenu_by_id(api_test_submenu_id: uuid.UUID,
                       session: Session = Depends(get_session)):
-    submenu = SC.get_submenu_by_id(api_test_submenu_id, session)
+    submenu: SubmenuSchema | None = SC.get_submenu_by_id(api_test_submenu_id, session)
     if submenu:
         dishes_count = SC.count_dishes(submenu.id, session)
         submenu.__setattr__('dishes_count', dishes_count)
     else:
-        raise HTTPException(status_code=404, detail="submenu not found")
+        raise HTTPException(status_code=404, detail='submenu not found')
     return submenu
 
 
@@ -58,16 +60,16 @@ def update_submenu_by_id(api_test_menu_id: uuid.UUID,
                          api_test_submenu_id: uuid.UUID,
                          submenu: CreateSubmenu,
                          session: Session = Depends(get_session)):
-    submenu_id = SC.update_submenu_by_id(api_test_menu_id, api_test_submenu_id, submenu, session)
+    submenu_id: uuid.UUID | None = SC.update_submenu_by_id(api_test_menu_id, api_test_submenu_id, submenu, session)
     if submenu_id:
-        submenu = SC.get_submenu_by_id(submenu_id, session)
-        # print(submenu)
-        dishes_count = SC.count_dishes(submenu.id, session)
-        submenu.__setattr__('dishes_count', dishes_count)
+        reterned_submenu: SubmenuSchema | None = SC.get_submenu_by_id(submenu_id, session)
+        if reterned_submenu:
+            # print(reterned_submenu)
+            dishes_count = SC.count_dishes(reterned_submenu.id, session)
+            reterned_submenu.__setattr__('dishes_count', dishes_count)
+            return reterned_submenu
     else:
         raise HTTPException(status_code=404, detail='submenu not found')
-
-    return submenu
 
 
 @router.delete('/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}')

@@ -1,13 +1,13 @@
 import uuid
 
 import sqlalchemy as sa
-from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import func
+
 from python_code.models.dish_model import Dish
 from python_code.models.menu_model import Menu
 from python_code.models.submenu_model import Submenu
-from python_code.schemas.menu_schemas import MenuSchema, CreateMenu
-
+from python_code.schemas.menu_schemas import CreateMenu, MenuSchema
 
 
 def get_menu_all(session: Session):

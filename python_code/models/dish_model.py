@@ -2,8 +2,7 @@ import decimal
 import uuid
 
 import sqlalchemy as sa
-from sqlalchemy import String, DECIMAL
-from sqlalchemy import orm
+from sqlalchemy import DECIMAL, String, orm
 from sqlalchemy.dialects.postgresql import UUID
 
 from python_code.db import Base
@@ -18,4 +17,4 @@ class Dish(Base):
     price: orm.Mapped[decimal.Decimal] = orm.mapped_column(DECIMAL(10, 2, decimal_return_scale=2))
     submenu_id: orm.Mapped[int] = orm.mapped_column(UUID(as_uuid=True), sa.ForeignKey('submenu.id', ondelete='CASCADE'))
 
-    submenu: orm.Mapped["Submenu"] = orm.relationship("Submenu", back_populates='dishes')
+    submenu: orm.Mapped['Submenu'] = orm.relationship('Submenu', back_populates='dishes')

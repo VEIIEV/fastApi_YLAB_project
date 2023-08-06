@@ -1,18 +1,19 @@
 import uuid
+from typing import Sequence
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 from python_code.models.dish_model import Dish
-from python_code.schemas.dish_schemas import DishSchema, CreateDish
+from python_code.schemas.dish_schemas import CreateDish, DishSchema
 
 
 def round_price(dish: Dish):
-    "brings the price to  x.xx format"
+    'brings the price to  x.xx format'
     dish.price = format(dish.price, '.2f')
 
 
-def get_dish_all(session: Session) -> [DishSchema]:
+def get_dish_all(session: Session) -> Sequence[Dish]:
     result = session.execute(sa.select(Dish))
     return result.scalars().all()
 
@@ -36,7 +37,7 @@ def is_exist_dish(title: str, session: Session) -> bool:
         return False
 
 
-def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: Session) -> DishSchema:
+def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: Session) -> DishSchema | None:
     result = session.execute(sa.insert(Dish).returning(Dish),
                              [{'title': dish.title,
                                'description': dish.description,

@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -17,8 +16,7 @@ class CreateMenu(BaseMenu):
 
 class MenuSchema(BaseMenu):
     id: uuid.UUID
-    submenu: List[BaseSubmenu] | None = None
-
+    submenu: list[BaseSubmenu] | None = None
 
     class Config:
         from_attributes = True

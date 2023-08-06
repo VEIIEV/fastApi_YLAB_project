@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from python_code.config import settings
 

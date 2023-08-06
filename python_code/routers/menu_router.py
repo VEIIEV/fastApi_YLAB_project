@@ -1,7 +1,6 @@
 import uuid
 
-from fastapi import APIRouter
-from fastapi import Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from python_code.cruds import menu_crud as MC
@@ -9,13 +8,13 @@ from python_code.db import get_session
 from python_code.schemas.menu_schemas import CreateMenu
 
 router = APIRouter(
-    tags=["menu"],
-    responses={404: {"details": "Menu not found"}},
+    tags=['menu'],
+    responses={404: {'details': 'Menu not found'}},
 )
 
 
 def add_counters_to_response(menu, session):
-    "Util func that add counter of dish and sub to menu resp"
+    'Util func that add counter of dish and sub to menu resp'
 
     submenus_count = MC.count_submenu(menu.id, session)
     dishes_count = MC.count_dishes(menu.id, session)
@@ -23,7 +22,7 @@ def add_counters_to_response(menu, session):
     menu.__setattr__('dishes_count', dishes_count)
 
 
-@router.get("/api/v1/menus")
+@router.get('/api/v1/menus')
 def get_all_menu(session: Session = Depends(get_session)):
     menu = MC.get_menu_all(session)
     for elem in menu:

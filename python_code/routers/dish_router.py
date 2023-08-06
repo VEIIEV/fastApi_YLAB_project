@@ -1,16 +1,11 @@
-import decimal
-
-from fastapi import APIRouter
 import uuid
 from typing import Annotated
 
-from fastapi import Depends, Path, HTTPException, FastAPI
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 
-from python_code import db
 from python_code.cruds import dish_crud as DC
-from python_code.routers import menu_router, submenu_router
-from python_code.db import init_db, get_session
+from python_code.db import get_session
 from python_code.schemas.dish_schemas import CreateDish, DishSchema
 
 router = APIRouter(tags=['dish'],
@@ -18,7 +13,7 @@ router = APIRouter(tags=['dish'],
 
 
 def round_price(dish: DishSchema):
-    "brings the price to  x.xx format"
+    'brings the price to  x.xx format'
     dish.price = format(dish.price, '.2f')
 
 
@@ -45,13 +40,12 @@ def get_dish_by_id(api_test_dish_id: uuid.UUID, session: Session = Depends(get_s
 def create_dish(api_test_submenu_id: uuid.UUID,
                 dish: CreateDish,
                 session: Session = Depends(get_session)):
-    print(dish.price)
-    dish.price = decimal.Decimal(dish.price)
-    print(dish.price)
-    dish = DC.create_dish(api_test_submenu_id, dish, session)
-    print(dish.price)
-    round_price(dish)
-    return dish
+    returned_dish: DishSchema | None = DC.create_dish(api_test_submenu_id, dish, session)
+    if returned_dish:
+        round_price(returned_dish)
+        return returned_dish
+    else:
+        raise HTTPException(status_code=404, detail='dish not found')
 
 
 @router.patch('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes/{api_test_dish_id}')
@@ -76,3 +70,9 @@ def delete_dish(api_test_dish_id: uuid.UUID, session: Session = Depends(get_sess
                 'message': 'The dish has been deleted'}
     else:
         raise HTTPException(status_code=404, detail='dish not found')
+
+
+@router.get('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes/check/{title}')
+def check_dish_existence(title: Annotated[str, Path(title='The ID of the item to get')],
+                         session: Session = Depends(get_session)):
+    return DC.is_exist_dish(title, session)

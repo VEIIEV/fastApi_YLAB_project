@@ -16,7 +16,7 @@ class CreateSubmenu(BaseSubmenu):
 
 class SubmenuSchema(BaseSubmenu):
     id: uuid.UUID
-    menu_id: uuid.UUID = Field(description="ref to his menu")
+    menu_id: uuid.UUID = Field(description='ref to his menu')
     dishes: list[BaseDish] = []
 
     class Config:
