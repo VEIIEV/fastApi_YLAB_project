@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from redis.client import Redis
 
 from python_code import db
 from python_code.db import init_db
+from python_code.redis import get_redis_connection
 
 # что бы meta_create_all отработал нужно импортировать классы таблиц, мерзость
 # from python_code.models.dish_model import Dish
@@ -16,12 +18,19 @@ app.include_router(submenu_router.router)
 app.include_router(dish_router.router)
 
 
+# TODO  для каждой ручки написать  самари описание и респонс модел
+
 @app.on_event('startup')
-async def on_startup():
+def on_startup():
     init_db(db.engine)
 
 
-# TODO pickle dumps pickle.loads
+# написать конструктор url адреса
+# todo кешируем только гет запросы
+# todo чистим их кеш при любых других
+# todo создать отдельные hset таблички для каждого вида, при добавление нового элемента стираем все выше стоящие
 @app.get('/')
-async def root():
-    return {'message': 'Hello World'}
+async def root(r: Redis = Depends(get_redis_connection)):
+    r.set(name='lol', value='kek')
+    response = r.get('lol')
+    return [{'message': 'Hello World', }, response]

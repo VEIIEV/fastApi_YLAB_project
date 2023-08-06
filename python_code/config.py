@@ -16,6 +16,10 @@ class Settings:
     DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}/{POSTGRES_DB}'
     # POSTGRES_URL = f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOSTNAME}:{settings.DATABASE_PORT}/{settings.POSTGRES_DB}"
 
+    REDIS_HOST: str | None = os.getenv('REDIS_HOST')
+    REDIS_PORT: str | None = os.getenv('REDIS_PORT')
+    REDIS_EXPIRE_TIME: str | None = os.getenv('REDIS_EXPIRE_TIME')
+
 
 # через него будем обращаться к конфигурациям
 settings = Settings()

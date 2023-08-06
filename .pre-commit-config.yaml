@@ -49,5 +49,5 @@ repos:
     -   id: mypy
         verbose: true
         args: [ --show-error-codes, --ignore-missing-imports]
-        additional_dependencies: [ 'types-requests']
+        additional_dependencies: [types-requests, types-redis]
         exclude: 'migrations'
