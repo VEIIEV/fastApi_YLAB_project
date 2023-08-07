@@ -19,15 +19,13 @@ app.include_router(dish_router.router)
 
 
 # TODO  для каждой ручки написать  самари описание и респонс модел
+# TODO написать конструктор url адреса
 
 @app.on_event('startup')
 def on_startup():
     init_db(db.engine)
 
 
-# todo написать конструктор url адреса
-# todo кешируем только гет запросы
-# todo чистим их кеш при любых других
 @app.get('/')
 async def root(r: Redis = Depends(get_redis_connection)):
     r.set(name='lol', value='kek')
