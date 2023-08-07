@@ -1,9 +1,9 @@
 from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
-from python_code.schemas.dish_schemas import DishSchema
+from python_code.schemas.dish_schemas import BaseDish, DishSchema
 
 
-def round_price(dish: DishSchema | None) -> None:
+def round_price(dish: DishSchema | BaseDish | None) -> None:
     'brings the price to  x.xx format'
     if dish:
         dish.price = format(dish.price, '.2f')

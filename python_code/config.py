@@ -18,7 +18,7 @@ class Settings:
 
     REDIS_HOST: str | None = os.getenv('REDIS_HOST')
     REDIS_PORT: str | None = os.getenv('REDIS_PORT')
-    REDIS_EXPIRE_TIME: str | None = os.getenv('REDIS_EXPIRE_TIME')
+    # REDIS_EXPIRE_TIME: str | None = os.getenv('REDIS_EXPIRE_TIME')
 
 
 # через него будем обращаться к конфигурациям
