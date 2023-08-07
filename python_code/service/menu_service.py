@@ -23,7 +23,7 @@ def find_all_menu(r: Redis,
     for elem in menu:
         add_counters_to_response(elem, session)
     r.set(request.url.path + request.method, pickle.dumps(menu))
-    r.expire(request.url.path + request.method, 180)
+    r.expire(request.url.path + request.method, 60)
     return menu
 
 
@@ -38,7 +38,7 @@ def find_menu_by_id(r: Redis,
     if menu:
         add_counters_to_response(menu, session)
         r.set(request.url.path + request.method, pickle.dumps(menu))
-        r.expire(request.url.path + request.method, 180)
+        r.expire(request.url.path + request.method, 60)
         return menu
     else:
         raise HTTPException(status_code=404, detail='menu not found')
@@ -48,9 +48,9 @@ def create_menu(menu: CreateMenu,
                 r: Redis,
                 request: Request,
                 session: Session):
-    r.delete(request.url.path + 'GET')
     created_menu: MenuSchema | None = MC.create_menu(menu, session)
     add_counters_to_response(created_menu, session)
+    r.delete(request.url.path + 'GET')
     return created_menu
 
 

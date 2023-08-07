@@ -25,10 +25,9 @@ def on_startup():
     init_db(db.engine)
 
 
-# написать конструктор url адреса
+# todo написать конструктор url адреса
 # todo кешируем только гет запросы
 # todo чистим их кеш при любых других
-# todo создать отдельные hset таблички для каждого вида, при добавление нового элемента стираем все выше стоящие
 @app.get('/')
 async def root(r: Redis = Depends(get_redis_connection)):
     r.set(name='lol', value='kek')

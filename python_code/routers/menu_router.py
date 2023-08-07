@@ -5,7 +5,7 @@ from redis.client import Redis  # type ignore[import]"
 from sqlalchemy.orm import Session
 
 from python_code.db import get_session
-from python_code.redis import RedisTable, get_redis_connection
+from python_code.redis import get_redis_connection
 from python_code.schemas.menu_schemas import CreateMenu
 from python_code.service.menu_service import (
     create_menu,
@@ -19,8 +19,6 @@ router = APIRouter(
     tags=['menu'],
     responses={404: {'details': 'Menu not found'}},
 )
-
-RedisTable.MENU.value
 
 
 @router.get('/api/v1/menus')
