@@ -23,7 +23,6 @@ def create_menu_for_test(get_host):
     yield MENU
     url = url + '/' + MENU['id']
     requests.delete(url)
-    print('create_menu_for_test fixture finalized')
 
 
 @pytest.fixture()
@@ -40,7 +39,6 @@ def create_submenu_for_test(get_host, create_menu_for_test):
     # удаляем сабменю
     url = url + '/' + response.json()['id']
     requests.delete(url)
-    print('create_submenu_for_test fixture finalized')
 
 
 # Положительные тесты
