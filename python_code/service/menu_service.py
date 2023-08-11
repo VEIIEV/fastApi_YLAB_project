@@ -3,7 +3,7 @@ import uuid
 from typing import Sequence
 
 from fastapi import HTTPException
-from redis.client import Redis
+from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
@@ -19,14 +19,14 @@ async def find_all_menu(r: Redis,
                         request: Request,
                         session: AsyncSession):
     redis: RedisDAO = RedisDAO(r)
-    data = redis.get(request.url.path + request.method)
+    data = await redis.get(request.url.path + request.method)
     if data:
         return pickle.loads(data)
     menu: Sequence[Menu] = await MC.get_menu_all(session)
     for elem in menu:
         await add_counters_to_response(elem, session)
-    redis.set(key=request.url.path + request.method, value=pickle.dumps(menu),
-              expire_time=settings.REDIS_EXPIRE_TIME)
+    await redis.set(key=request.url.path + request.method, value=pickle.dumps(menu),
+                    expire_time=settings.REDIS_EXPIRE_TIME)
     return menu
 
 
@@ -35,16 +35,14 @@ async def find_menu_by_id(r: Redis,
                           session: AsyncSession,
                           api_test_menu_id: uuid.UUID):
     redis: RedisDAO = RedisDAO(r)
-    data = redis.get(request.url.path + request.method)
+    data = await redis.get(request.url.path + request.method)
     if data:
         return pickle.loads(data)
     menu = await MC.get_menu_by_id(api_test_menu_id, session)
-    menu = await MC.get_menu_by_id(api_test_menu_id, session)
-    menu = await MC.get_menu_by_id(api_test_menu_id, session)
     if menu:
         await add_counters_to_response(menu, session)
-        redis.set(key=request.url.path + request.method, value=pickle.dumps(menu),
-                  expire_time=settings.REDIS_EXPIRE_TIME)
+        await redis.set(key=request.url.path + request.method, value=pickle.dumps(menu),
+                        expire_time=settings.REDIS_EXPIRE_TIME)
         return menu
     else:
         raise HTTPException(status_code=404, detail='menu not found')
@@ -57,7 +55,7 @@ async def create_menu(menu: CreateMenu,
     redis: RedisDAO = RedisDAO(r)
     created_menu: MenuSchema | None = await MC.create_menu(menu, session)
     await add_counters_to_response(created_menu, session)
-    redis.unvalidate(request.url.path + 'GET')
+    await redis.unvalidate(request.url.path + 'GET')
     return created_menu
 
 
@@ -70,8 +68,8 @@ async def update_menu_by_id(menu: CreateMenu,
     updated_menu = await MC.update_menu_by_id(api_test_menu_id, menu, session)
     if updated_menu:
         await add_counters_to_response(updated_menu, session)
-        redis.unvalidate(request.url.path + 'GET',
-                         '/api/v1/menusGET')
+        await redis.unvalidate(request.url.path + 'GET',
+                               '/api/v1/menusGET')
         return updated_menu
     else:
         raise HTTPException(status_code=404, detail='menu not found')
@@ -84,8 +82,8 @@ async def delete_menu_by_id(request: Request,
     redis: RedisDAO = RedisDAO(r)
     menu_id = await MC.delete_menu_by_id(api_test_menu_id, session)
     if menu_id:
-        redis.unvalidate(request.url.path + 'GET',
-                         '/api/v1/menusGET')
+        await redis.unvalidate(request.url.path + 'GET',
+                               '/api/v1/menusGET')
         return {'status': True,
                 'message': 'The menu has been deleted'}
     else:

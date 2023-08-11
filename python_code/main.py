@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI
-from redis.client import Redis
+from redis.asyncio.client import Redis
 
 from python_code import db
 from python_code.db import init_db
@@ -28,6 +28,6 @@ async def on_startup():
 
 @app.get('/')
 async def root(r: Redis = Depends(get_redis_connection)):
-    r.set(name='lol', value='kek')
+    await r.set(name='lol', value='kek')
     response = r.get('lol')
     return [{'message': 'Hello World', }, response]

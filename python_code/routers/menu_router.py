@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Request
-from redis.client import Redis  # type ignore[import]"
+from redis.asyncio.client import Redis  # type ignore[import]"
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from python_code.db import get_async_session

@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends
-from redis.client import Redis
+from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 

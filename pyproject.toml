@@ -23,6 +23,7 @@ pre-commit = "^3.3.3"
 mypy = "^1.4.1"
 redis = "^4.6.0"
 sqlalchemy = "^2.0.19"
+aioredis = "^2.0.1"
 
 
 [build-system]

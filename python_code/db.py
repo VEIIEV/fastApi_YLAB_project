@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 
+from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -22,8 +23,9 @@ engine: AsyncEngine = create_async_engine(settings.DATABASE_URL)
 
 
 async def init_db(eng: AsyncEngine):
-    get_redis_connection().flushall()
-    async with (eng.begin() as connection):
+    redis: Redis = await get_redis_connection()
+    await redis.flushall()
+    async with eng.begin() as connection:
         await connection.run_sync(Base.metadata.drop_all)
         await connection.run_sync(Base.metadata.create_all)
         # Base.metadata.drop_all(bind=eng)
@@ -33,7 +35,6 @@ async def init_db(eng: AsyncEngine):
 
 # фабрика, которая генерируют новую сессия при каждом вызове
 Session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
-
 
 # Every model will inherit this 'Base' class and we will utilize this base class to create all the database tables.
 Base = declarative_base()

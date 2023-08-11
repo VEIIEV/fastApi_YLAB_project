@@ -1,8 +1,8 @@
 import uuid
 from typing import Annotated
 
+from aioredis.client import Redis
 from fastapi import APIRouter, Body, Depends, Path
-from redis.client import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
