@@ -2,6 +2,7 @@ import uuid
 from typing import Sequence
 
 import sqlalchemy as sa
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncResult, AsyncSession
 from sqlalchemy.sql.expression import func
 
@@ -16,15 +17,20 @@ async def get_submenu_all(session: AsyncSession) -> Sequence[SubmenuSchema]:
 
 
 async def get_submenu_by_id(id: uuid.UUID, session: AsyncSession) -> SubmenuSchema | None:
-    result: AsyncResult = await session.execute(sa.select(Submenu).where(Submenu.id == id))
+    query = select(Submenu).filter(Submenu.id == id)
+    result = await session.execute(query)
+    # result = await session.execute(select(text('submenu')).where(Submenu.id == id))
+    #  query = select(UserQuestionnaire).order_by(UserQuestionnaire.city).fetch(10)
+    #     result = await session.execute(query)
+    #     return result.scalars().fetchall()
     return result.scalar()
 
 
 async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu, session: AsyncSession) -> SubmenuSchema | None:
-    created_submenu: AsyncResult = await session.execute(sa.insert(Submenu).returning(Submenu),
-                                                         [{'title': submenu.title,
-                                                           'description': submenu.description,
-                                                           'menu_id': menu_id}])
+    created_submenu = await session.execute(sa.insert(Submenu).returning(Submenu),
+                                            [{'title': submenu.title,
+                                              'description': submenu.description,
+                                              'menu_id': menu_id}])
     await session.commit()
     return created_submenu.scalar()
 
@@ -32,11 +38,11 @@ async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu, session: As
 # todo переделать update (наверное)
 async def update_submenu_by_id(menu_id: uuid.UUID, submenu_id: uuid.UUID, submenu: CreateSubmenu,
                                session: AsyncSession) -> uuid.UUID | None:
-    updated_submenu: AsyncResult = await session.connection().execute(
-        sa.update(Submenu).where(Submenu.id == submenu_id).returning(Submenu),
-        [{'title': submenu.title,
-          'description': submenu.description,
-          'menu_id': menu_id}])
+    updated_submenu = await session.execute(
+        sa.update(Submenu).where(Submenu.id == submenu_id).returning(Submenu).values(
+            title=submenu.title,
+            description=submenu.description,
+            menu_id=menu_id))
     await session.commit()
     return updated_submenu.scalar()
 

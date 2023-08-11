@@ -1,7 +1,7 @@
 from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from python_code.config import settings
 
@@ -30,12 +30,11 @@ async def init_db(eng: AsyncEngine):
 
 
 # фабрика, которая генерируют новую сессия при каждом вызове
-Session = sessionmaker(bind=engine, class_=AsyncSession)
+Session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 
 # Every model will inherit this 'Base' class and we will utilize this base class to create all the database tables.
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 
 # используется как зависимости, для создания сессии с бд

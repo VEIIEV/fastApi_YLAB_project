@@ -46,11 +46,11 @@ async def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: AsyncSes
 # todo чёт тут какая-то ёбань
 async def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish,
                             session: AsyncSession) -> uuid.UUID | None:
-    result: AsyncResult = await session.connection().execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish),
-                                                             [{'title': dish.title,
-                                                               'description': dish.description,
-                                                               'price': dish.price,
-                                                               'submenu_id': submenu_id}])
+    result = await session.execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish).values(
+        title=dish.title,
+        description=dish.description,
+        price=dish.price,
+        submenu_id=submenu_id))
     await session.commit()
     return result.scalar()
 

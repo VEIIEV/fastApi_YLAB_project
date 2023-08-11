@@ -18,7 +18,7 @@ async def get_menu_all(session: AsyncSession) -> Sequence[Menu]:
 
 
 async def get_menu_by_id(id: uuid.UUID, session: AsyncSession) -> MenuSchema | None:
-    result: AsyncResult = await session.execute(sa.select(Menu).where(Menu.id == id))
+    result: AsyncResult = await session.execute(sa.select(Menu).filter(Menu.id == id))
     return result.scalar()
 
 
@@ -31,9 +31,10 @@ async def create_menu(menu: CreateMenu, session: AsyncSession) -> MenuSchema | N
 
 # todo и тут тоже
 async def update_menu_by_id(menu_id: uuid.UUID, menu: CreateMenu, session: AsyncSession) -> uuid.UUID | None:
-    updated_menu: AsyncResult = await session.connection().execute(
-        sa.update(Menu).where(Menu.id == menu_id).returning(Menu),
-        [{'title': menu.title, 'description': menu.description}])
+    updated_menu: AsyncResult = await session.execute(
+        sa.update(Menu).where(Menu.id == menu_id).returning(Menu).values(
+            title=menu.title,
+            description=menu.description))
     await session.commit()
     return updated_menu.scalar()
 
