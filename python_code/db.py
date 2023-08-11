@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from python_code.config import settings
+from python_code.redis import get_redis_connection
 
 # connection pool - список соеденений с бд
 
@@ -21,6 +22,7 @@ engine: AsyncEngine = create_async_engine(settings.DATABASE_URL)
 
 
 async def init_db(eng: AsyncEngine):
+    get_redis_connection().flushall()
     async with (eng.begin() as connection):
         await connection.run_sync(Base.metadata.drop_all)
         await connection.run_sync(Base.metadata.create_all)

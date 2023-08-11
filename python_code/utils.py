@@ -14,7 +14,8 @@ def round_price(dish: DishSchema | BaseDish | None) -> None:
 async def add_dish_number_to_submenu(submenu, session: AsyncSession) -> None:
     'add dish_count to submenu'
     dishes_count = await SC.count_dishes(submenu.id, session)
-    session.__setattr__('dishes_count', dishes_count)
+    submenu.__setattr__('dishes_count', dishes_count)
+    print()
 
 
 async def add_counters_to_response(menu, session: AsyncSession) -> None:

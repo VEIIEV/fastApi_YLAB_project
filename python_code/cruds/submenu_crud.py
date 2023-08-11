@@ -2,7 +2,6 @@ import uuid
 from typing import Sequence
 
 import sqlalchemy as sa
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncResult, AsyncSession
 from sqlalchemy.sql.expression import func
 
@@ -16,9 +15,13 @@ async def get_submenu_all(session: AsyncSession) -> Sequence[SubmenuSchema]:
     return result.scalars().all()
 
 
+async def get_submenu_all_for_menu(menu_id: uuid.UUID, session: AsyncSession) -> Sequence[SubmenuSchema]:
+    result: AsyncResult = await session.execute(sa.select(Submenu).filter(Submenu.menu_id == menu_id))
+    return result.scalars().all()
+
+
 async def get_submenu_by_id(id: uuid.UUID, session: AsyncSession) -> SubmenuSchema | None:
-    query = select(Submenu).filter(Submenu.id == id)
-    result = await session.execute(query)
+    result: AsyncResult = await session.execute(sa.select(Submenu).filter_by(id=id))
     # result = await session.execute(select(text('submenu')).where(Submenu.id == id))
     #  query = select(UserQuestionnaire).order_by(UserQuestionnaire.city).fetch(10)
     #     result = await session.execute(query)

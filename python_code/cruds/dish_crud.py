@@ -20,7 +20,7 @@ async def get_dish_for_submenu_all(submenu_id: uuid.UUID, session: AsyncSession)
 
 
 async def get_dish_by_id(id: uuid.UUID, session: AsyncSession) -> DishSchema | None:
-    result = await session.execute(sa.select(Dish).where(Dish.id == id))
+    result = await session.execute(sa.select(Dish).filter_by(id=id))
     return result.scalar()
 
 
@@ -45,7 +45,7 @@ async def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: AsyncSes
 
 # todo чёт тут какая-то ёбань
 async def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish,
-                            session: AsyncSession) -> uuid.UUID | None:
+                            session: AsyncSession):
     result = await session.execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish).values(
         title=dish.title,
         description=dish.description,

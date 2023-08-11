@@ -79,9 +79,8 @@ async def update_dish(request: Request,
                       session: AsyncSession,
                       r: Redis):
     redis: RedisDAO = RedisDAO(r)
-    dish_id = await DC.update_dish_by_id(api_test_submenu_id, api_test_dish_id, dish, session)
-    if dish_id:
-        updated_dish: DishSchema | None = await DC.get_dish_by_id(dish_id, session)
+    updated_dish = await DC.update_dish_by_id(api_test_submenu_id, api_test_dish_id, dish, session)
+    if updated_dish:
         round_price(updated_dish)
         redis.unvalidate(request.url.path + 'GET',
                          '/api/v1/menus/' + str(api_test_menu_id) + '/submenus/' + str(

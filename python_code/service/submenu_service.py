@@ -7,14 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from python_code.config import settings
-from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
 from python_code.dao.redis_dao import RedisDAO
-from python_code.schemas.submenu_schemas import (
-    BaseSubmenu,
-    CreateSubmenu,
-    SubmenuSchema,
-)
+from python_code.schemas.submenu_schemas import CreateSubmenu, SubmenuSchema
 from python_code.utils import add_dish_number_to_submenu
 
 
@@ -26,12 +21,10 @@ async def get_all_submenu(request: Request,
     data = redis.get(request.url.path + request.method)
     if data:
         return pickle.loads(data)
-    menu = await MC.get_menu_by_id(api_test_menu_id, session)
-    if menu:
-        submenus: list[BaseSubmenu] | None = menu.submenu
-        if submenus:
-            for elem in submenus:
-                await add_dish_number_to_submenu(elem, session)
+    submenus = await SC.get_submenu_all_for_menu(api_test_menu_id, session)
+    if submenus:
+        for elem in submenus:
+            await add_dish_number_to_submenu(elem, session)
         redis.set(key=request.url.path + request.method, value=pickle.dumps(submenus),
                   expire_time=settings.REDIS_EXPIRE_TIME)
         return submenus
@@ -79,18 +72,16 @@ async def update_submenu_by_id(request: Request,
                                session: AsyncSession,
                                r: Redis):
     redis: RedisDAO = RedisDAO(r)
-    submenu_id: uuid.UUID | None = await SC.update_submenu_by_id(api_test_menu_id, api_test_submenu_id, submenu,
-                                                                 session)
-    if submenu_id:
-        reterned_submenu: SubmenuSchema | None = await SC.get_submenu_by_id(submenu_id, session)
-        if reterned_submenu:
-            # print(reterned_submenu)
-            await add_dish_number_to_submenu(reterned_submenu, session)
-            redis.unvalidate(request.url.path + 'GET',
-                             '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
-                             '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
-                             '/api/v1/menusGET')
-            return reterned_submenu
+    updated_submenu: uuid.UUID | None = await SC.update_submenu_by_id(api_test_menu_id, api_test_submenu_id, submenu,
+                                                                      session)
+    if updated_submenu:
+        # print(reterned_submenu)
+        await add_dish_number_to_submenu(updated_submenu, session)
+        redis.unvalidate(request.url.path + 'GET',
+                         '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
+                         '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
+                         '/api/v1/menusGET')
+        return updated_submenu
     else:
         raise HTTPException(status_code=404, detail='submenu not found')
 

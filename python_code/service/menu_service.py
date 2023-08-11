@@ -39,6 +39,8 @@ async def find_menu_by_id(r: Redis,
     if data:
         return pickle.loads(data)
     menu = await MC.get_menu_by_id(api_test_menu_id, session)
+    menu = await MC.get_menu_by_id(api_test_menu_id, session)
+    menu = await MC.get_menu_by_id(api_test_menu_id, session)
     if menu:
         await add_counters_to_response(menu, session)
         redis.set(key=request.url.path + request.method, value=pickle.dumps(menu),
@@ -65,13 +67,12 @@ async def update_menu_by_id(menu: CreateMenu,
                             request: Request,
                             session: AsyncSession):
     redis: RedisDAO = RedisDAO(r)
-    menu_id: uuid.UUID | None = await MC.update_menu_by_id(api_test_menu_id, menu, session)
-    if menu_id:
-        created_menu: MenuSchema | None = await MC.get_menu_by_id(menu_id, session)
-        await add_counters_to_response(created_menu, session)
+    updated_menu = await MC.update_menu_by_id(api_test_menu_id, menu, session)
+    if updated_menu:
+        await add_counters_to_response(updated_menu, session)
         redis.unvalidate(request.url.path + 'GET',
                          '/api/v1/menusGET')
-        return created_menu
+        return updated_menu
     else:
         raise HTTPException(status_code=404, detail='menu not found')
 
