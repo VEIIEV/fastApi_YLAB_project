@@ -22,8 +22,8 @@ app.include_router(dish_router.router)
 # TODO написать конструктор url адреса
 
 @app.on_event('startup')
-def on_startup():
-    init_db(db.engine)
+async def on_startup():
+    await init_db(db.engine)
 
 
 @app.get('/')

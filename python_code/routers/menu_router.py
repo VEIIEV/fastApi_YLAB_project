@@ -2,9 +2,9 @@ import uuid
 
 from fastapi import APIRouter, Depends, Request
 from redis.client import Redis  # type ignore[import]"
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from python_code.db import get_session
+from python_code.db import get_async_session
 from python_code.redis import get_redis_connection
 from python_code.schemas.menu_schemas import CreateMenu
 from python_code.service.menu_service import (
@@ -24,9 +24,9 @@ router = APIRouter(
 @router.get('/api/v1/menus',
             summary='get all menu',
             response_description='list of all menu, if empty return []')
-def get_all_menu_endpoint(request: Request,
-                          session: Session = Depends(get_session),
-                          r: Redis = Depends(get_redis_connection)):
+async def get_all_menu_endpoint(request: Request,
+                                session: AsyncSession = Depends(get_async_session),
+                                r: Redis = Depends(get_redis_connection)):
     """
     Return dishes with all the information:
     - **title**:
@@ -34,15 +34,15 @@ def get_all_menu_endpoint(request: Request,
     - **own_id**:
     - **submenu's list**:
     """
-    return find_all_menu(r, request, session)
+    return await find_all_menu(r, request, session)
 
 
 @router.get('/api/v1/menus/{api_test_menu_id}',
-            summary='return menu with pointed id',)
-def get_menu_by_id_endpoint(request: Request,
-                            api_test_menu_id: uuid.UUID,
-                            session: Session = Depends(get_session),
-                            r: Redis = Depends(get_redis_connection)):
+            summary='return menu with pointed id', )
+async def get_menu_by_id_endpoint(request: Request,
+                                  api_test_menu_id: uuid.UUID,
+                                  session: AsyncSession = Depends(get_async_session),
+                                  r: Redis = Depends(get_redis_connection)):
     """
     Return selected menu if existed, else return 404:
     - **title**:
@@ -50,15 +50,15 @@ def get_menu_by_id_endpoint(request: Request,
     - **own_id**:
     - **submenu's list**:
     """
-    return find_menu_by_id(r, request, session, api_test_menu_id)
+    return await find_menu_by_id(r, request, session, api_test_menu_id)
 
 
 @router.post('/api/v1/menus', status_code=201,
              summary='create menu')
-def create_menu_endpoint(request: Request,
-                         menu: CreateMenu,
-                         session: Session = Depends(get_session),
-                         r: Redis = Depends(get_redis_connection)):
+async def create_menu_endpoint(request: Request,
+                               menu: CreateMenu,
+                               session: AsyncSession = Depends(get_async_session),
+                               r: Redis = Depends(get_redis_connection)):
     """
     Create new menu and return  created menu data
     - **title**:
@@ -66,16 +66,16 @@ def create_menu_endpoint(request: Request,
     - **own_id**:
     - **submenu's list**:
     """
-    return create_menu(menu, r, request, session)
+    return await create_menu(menu, r, request, session)
 
 
 @router.patch('/api/v1/menus/{api_test_menu_id}',
               summary='update menu')
-def update_menu_by_id_endpoint(request: Request,
-                               api_test_menu_id: uuid.UUID,
-                               menu: CreateMenu,
-                               session: Session = Depends(get_session),
-                               r: Redis = Depends(get_redis_connection)):
+async def update_menu_by_id_endpoint(request: Request,
+                                     api_test_menu_id: uuid.UUID,
+                                     menu: CreateMenu,
+                                     session: AsyncSession = Depends(get_async_session),
+                                     r: Redis = Depends(get_redis_connection)):
     """
     if exist Update menu and return  updated menu data
     else return 404:
@@ -84,17 +84,17 @@ def update_menu_by_id_endpoint(request: Request,
     - **own_id**:
     - **submenu's list**:
     """
-    return update_menu_by_id(menu, api_test_menu_id, r, request, session)
+    return await update_menu_by_id(menu, api_test_menu_id, r, request, session)
 
 
 @router.delete('/api/v1/menus/{api_test_menu_id}',
                summary='delete menu')
-def delete_menu_by_id_endpoint(request: Request,
-                               api_test_menu_id: uuid.UUID,
-                               session: Session = Depends(get_session),
-                               r: Redis = Depends(get_redis_connection)):
+async def delete_menu_by_id_endpoint(request: Request,
+                                     api_test_menu_id: uuid.UUID,
+                                     session: AsyncSession = Depends(get_async_session),
+                                     r: Redis = Depends(get_redis_connection)):
     """
     if exist delete selected menu and return confirm message
     else return 404
     """
-    return delete_menu_by_id(request, api_test_menu_id, session, r)
+    return await delete_menu_by_id(request, api_test_menu_id, session, r)

@@ -1,6 +1,7 @@
-import sqlalchemy
-import sqlalchemy as sa
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from python_code.config import settings
 
@@ -16,17 +17,20 @@ from python_code.config import settings
 # Engine= Connects a Pool and Dialect together to provide a source of database connectivity and behavior.
 
 print(settings.DATABASE_URL)
-engine = sa.create_engine(settings.DATABASE_URL)
+engine: AsyncEngine = create_async_engine(settings.DATABASE_URL)
 
 
-def init_db(eng):
-    Base.metadata.drop_all(bind=eng)
-    Base.metadata.create_all(bind=eng)
-    print('hello')
+async def init_db(eng: AsyncEngine):
+    async with (eng.begin() as connection):
+        await connection.run_sync(Base.metadata.drop_all)
+        await connection.run_sync(Base.metadata.create_all)
+        # Base.metadata.drop_all(bind=eng)
+        # Base.metadata.create_all(bind=eng)
+        print('hello')
 
 
 # фабрика, которая генерируют новую сессия при каждом вызове
-Session = sessionmaker(bind=engine, class_=Session)
+Session = sessionmaker(bind=engine, class_=AsyncSession)
 
 
 # Every model will inherit this 'Base' class and we will utilize this base class to create all the database tables.
@@ -35,11 +39,14 @@ class Base(DeclarativeBase):
 
 
 # используется как зависимости, для создания сессии с бд
-async def get_session():
-    session: sqlalchemy.orm.Session = Session()
-    try:
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    async with Session() as session:
         yield session
-    except Exception as e:
-        print(str(type(e)))
-    finally:
-        session.close()
+
+    # session: sqlalchemy.orm.Session = Session()
+    # try:
+    #     yield session
+    # except Exception as e:
+    #     print(str(type(e)))
+    # finally:
+    #     session.close()

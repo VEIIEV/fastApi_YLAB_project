@@ -13,8 +13,8 @@ class Settings:
     POSTGRES_SERVER: str | None = os.getenv('POSTGRES_SERVER')
     POSTGRES_DB: str | None = os.getenv('POSTGRES_DB')
 
-    DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}/{POSTGRES_DB}'
-    # POSTGRES_URL = f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOSTNAME}:{settings.DATABASE_PORT}/{settings.POSTGRES_DB}"
+    DATABASE_URL = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}/{POSTGRES_DB}'
+    # POSTGRES_URL = f"postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOSTNAME}:{settings.DATABASE_PORT}/{settings.POSTGRES_DB}"
 
     REDIS_HOST: str | None = os.getenv('REDIS_HOST')
     REDIS_PORT: str | None = os.getenv('REDIS_PORT')

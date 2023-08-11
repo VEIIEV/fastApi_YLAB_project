@@ -16,7 +16,7 @@ class CreateMenu(BaseMenu):
 
 class MenuSchema(BaseMenu):
     id: uuid.UUID
-    submenu: list[BaseSubmenu] | None = None
+    submenu: list[BaseSubmenu] = []
 
     class Config:
         from_attributes = True

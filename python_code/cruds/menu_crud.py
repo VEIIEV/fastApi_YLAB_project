@@ -2,8 +2,7 @@ import uuid
 from typing import Sequence
 
 import sqlalchemy as sa
-from sqlalchemy import Result
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncResult, AsyncSession
 from sqlalchemy.sql.expression import func
 
 from python_code.models.dish_model import Dish
@@ -12,45 +11,47 @@ from python_code.models.submenu_model import Submenu
 from python_code.schemas.menu_schemas import CreateMenu, MenuSchema
 
 
-def get_menu_all(session: Session) -> Sequence[Menu]:
-    result: Result = session.execute(sa.select(Menu))
+async def get_menu_all(session: AsyncSession) -> Sequence[Menu]:
+    result: AsyncResult = await session.execute(sa.select(Menu))
 
     return result.scalars().all()
 
 
-def get_menu_by_id(id: uuid.UUID, session: Session) -> MenuSchema | None:
-    result: Result = session.execute(sa.select(Menu).where(Menu.id == id))
+async def get_menu_by_id(id: uuid.UUID, session: AsyncSession) -> MenuSchema | None:
+    result: AsyncResult = await session.execute(sa.select(Menu).where(Menu.id == id))
     return result.scalar()
 
 
-def create_menu(menu: CreateMenu, session: Session) -> MenuSchema | None:
-    created_menu: Result = session.execute(sa.insert(Menu).returning(Menu),
-                                           [{'title': menu.title, 'description': menu.description}])
-    session.commit()
+async def create_menu(menu: CreateMenu, session: AsyncSession) -> MenuSchema | None:
+    created_menu: AsyncResult = await session.execute(sa.insert(Menu).returning(Menu),
+                                                      [{'title': menu.title, 'description': menu.description}])
+    await session.commit()
     return created_menu.scalar()
 
 
-def update_menu_by_id(menu_id: uuid.UUID, menu: CreateMenu, session: Session) -> uuid.UUID | None:
-    updated_menu: Result = session.connection().execute(
+# todo и тут тоже
+async def update_menu_by_id(menu_id: uuid.UUID, menu: CreateMenu, session: AsyncSession) -> uuid.UUID | None:
+    updated_menu: AsyncResult = await session.connection().execute(
         sa.update(Menu).where(Menu.id == menu_id).returning(Menu),
         [{'title': menu.title, 'description': menu.description}])
-    session.commit()
+    await session.commit()
     return updated_menu.scalar()
 
 
-def delete_menu_by_id(id: uuid.UUID, session: Session) -> MenuSchema | None:
-    deleted_menu: Result = session.execute(sa.delete(Menu).returning(Menu).where(Menu.id == id))
-    session.commit()
+async def delete_menu_by_id(id: uuid.UUID, session: AsyncSession) -> MenuSchema | None:
+    deleted_menu: AsyncResult = await session.execute(sa.delete(Menu).returning(Menu).where(Menu.id == id))
+    await session.commit()
     return deleted_menu.scalar()
 
 
-def count_submenu(menu_id: uuid.UUID, session: Session) -> int:
-    result: Result = session.execute(sa.select(func.count(Submenu.id)).join(Menu.submenu).where(Menu.id == menu_id))
+async def count_submenu(menu_id: uuid.UUID, session: AsyncSession) -> int:
+    result = await session.execute(
+        sa.select(func.count(Submenu.id)).join(Menu.submenu).where(Menu.id == menu_id))
     return result.scalar()
 
 
-def count_dishes(menu_id: uuid.UUID, session: Session) -> int:
-    result: Result = session.execute(
+async def count_dishes(menu_id: uuid.UUID, session: AsyncSession) -> int:
+    result = await session.execute(
         sa.select(func.count(Dish.id))
         .join(Menu.submenu)
         .join(Submenu.dishes)
