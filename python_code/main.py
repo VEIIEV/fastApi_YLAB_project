@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI
-from redis.client import Redis
+from redis.asyncio.client import Redis
 
 from python_code import db
 from python_code.db import init_db
@@ -18,16 +18,16 @@ app.include_router(submenu_router.router)
 app.include_router(dish_router.router)
 
 
-# TODO  для каждой ручки написать  самари описание и респонс модел
+# todo логировать анвалидацию кеша
 # TODO написать конструктор url адреса
 
 @app.on_event('startup')
-def on_startup():
-    init_db(db.engine)
+async def on_startup():
+    await init_db(db.engine)
 
 
 @app.get('/')
 async def root(r: Redis = Depends(get_redis_connection)):
-    r.set(name='lol', value='kek')
+    await r.set(name='lol', value='kek')
     response = r.get('lol')
     return [{'message': 'Hello World', }, response]

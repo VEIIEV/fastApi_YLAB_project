@@ -1,11 +1,11 @@
 import uuid
 
-from fastapi import APIRouter, Depends
-from redis.client import Redis
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, BackgroundTasks, Depends
+from redis.asyncio.client import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-from python_code.db import get_session
+from python_code.db import get_async_session
 from python_code.redis import get_redis_connection
 from python_code.schemas.submenu_schemas import CreateSubmenu
 from python_code.service.submenu_service import (
@@ -25,24 +25,24 @@ router = APIRouter(
 @router.get('/api/v1/menus/{api_test_menu_id}/submenus',
             summary='get all submenu belonging to menu that specified in url',
             response_description='list of all submenu, if empty return []')
-def get_all_submenu_endpoint(request: Request,
-                             api_test_menu_id: uuid.UUID,
-                             session: Session = Depends(get_session),
-                             r: Redis = Depends(get_redis_connection)):
+async def get_all_submenu_endpoint(request: Request,
+                                   api_test_menu_id: uuid.UUID,
+                                   session: AsyncSession = Depends(get_async_session),
+                                   r: Redis = Depends(get_redis_connection)):
     """
     Return submenu with all the information:
     - **title**:
     - **description**:
     """
-    return get_all_submenu(request, api_test_menu_id, session, r)
+    return await get_all_submenu(request, api_test_menu_id, session, r)
 
 
 @router.get('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}',
             summary='return submenu with pointed id', )
-def get_submenu_by_id_endpoint(request: Request,
-                               api_test_submenu_id: uuid.UUID,
-                               session: Session = Depends(get_session),
-                               r: Redis = Depends(get_redis_connection)):
+async def get_submenu_by_id_endpoint(request: Request,
+                                     api_test_submenu_id: uuid.UUID,
+                                     session: AsyncSession = Depends(get_async_session),
+                                     r: Redis = Depends(get_redis_connection)):
     """
     Return selected submenu if existed, else return 404:
     - **title**:
@@ -51,16 +51,17 @@ def get_submenu_by_id_endpoint(request: Request,
     - **dishes_list**:
     - **menu_id**
     """
-    return get_submenu_by_id(request, api_test_submenu_id, session, r)
+    return await get_submenu_by_id(request, api_test_submenu_id, session, r)
 
 
 @router.post('/api/v1/menus/{api_test_menu_id}/submenus', status_code=201,
              summary='create submenu in pointed menu')
-def create_submenu_endpoint(request: Request,
-                            api_test_menu_id: uuid.UUID,
-                            submenu: CreateSubmenu,
-                            session: Session = Depends(get_session),
-                            r: Redis = Depends(get_redis_connection)):
+async def create_submenu_endpoint(request: Request,
+                                  api_test_menu_id: uuid.UUID,
+                                  submenu: CreateSubmenu,
+                                  background_tasks: BackgroundTasks,
+                                  session: AsyncSession = Depends(get_async_session),
+                                  r: Redis = Depends(get_redis_connection)):
     """
     Create new submenu in selected menu and return created submenu data
     - **title**:
@@ -69,17 +70,19 @@ def create_submenu_endpoint(request: Request,
     - **dishes_list**:
     - **menu_id**
     """
-    return create_submenu(request, api_test_menu_id, submenu, session, r)
+    return await create_submenu(request, api_test_menu_id,
+                                submenu, session, r, background_tasks)
 
 
 @router.patch('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}',
               summary='update submenu in pointed menu')
-def update_submenu_by_id_endpoint(request: Request,
-                                  api_test_menu_id: uuid.UUID,
-                                  api_test_submenu_id: uuid.UUID,
-                                  submenu: CreateSubmenu,
-                                  session: Session = Depends(get_session),
-                                  r: Redis = Depends(get_redis_connection)):
+async def update_submenu_by_id_endpoint(request: Request,
+                                        api_test_menu_id: uuid.UUID,
+                                        api_test_submenu_id: uuid.UUID,
+                                        submenu: CreateSubmenu,
+                                        background_tasks: BackgroundTasks,
+                                        session: AsyncSession = Depends(get_async_session),
+                                        r: Redis = Depends(get_redis_connection)):
     """
     if exist Update submenu in selected menu and return updated submenu data
     else return 404
@@ -89,18 +92,22 @@ def update_submenu_by_id_endpoint(request: Request,
     - **dishes_list**:
     - **menu_id**
     """
-    return update_submenu_by_id(request, api_test_menu_id, api_test_submenu_id, submenu, session, r)
+    return await update_submenu_by_id(request, api_test_menu_id,
+                                      api_test_submenu_id, submenu,
+                                      session, r, background_tasks)
 
 
 @router.delete('/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}',
                summary='delete pointed submenu')
-def delete_submenu_by_id_endpoint(request: Request,
-                                  target_menu_id: uuid.UUID,
-                                  target_submenu_id: uuid.UUID,
-                                  session: Session = Depends(get_session),
-                                  r: Redis = Depends(get_redis_connection)):
+async def delete_submenu_by_id_endpoint(request: Request,
+                                        target_menu_id: uuid.UUID,
+                                        target_submenu_id: uuid.UUID,
+                                        background_tasks: BackgroundTasks,
+                                        session: AsyncSession = Depends(get_async_session),
+                                        r: Redis = Depends(get_redis_connection)):
     """
     if exist delete selected submenu and return confirm message
     else return 404
     """
-    return delete_submenu_by_id(request, target_menu_id, target_submenu_id, session, r)
+    return await delete_submenu_by_id(request, target_menu_id,
+                                      target_submenu_id, session, r, background_tasks)

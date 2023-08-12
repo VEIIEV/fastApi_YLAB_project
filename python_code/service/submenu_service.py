@@ -2,110 +2,112 @@ import pickle
 import uuid
 
 from fastapi import HTTPException
-from redis.client import Redis
-from sqlalchemy.orm import Session
+from redis.asyncio.client import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from python_code.config import settings
-from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
 from python_code.dao.redis_dao import RedisDAO
-from python_code.schemas.submenu_schemas import (
-    BaseSubmenu,
-    CreateSubmenu,
-    SubmenuSchema,
-)
-from python_code.utils import add_dish_number_to_submenu
+from python_code.schemas.submenu_schemas import CreateSubmenu, SubmenuSchema
+from python_code.utils import add_dish_number_to_submenu, unvalidate_cache
+
+basepath = ['/api/v1/menus/expandedGET']
 
 
-def get_all_submenu(request: Request,
-                    api_test_menu_id: uuid.UUID,
-                    session: Session,
-                    r: Redis):
+async def get_all_submenu(request: Request,
+                          api_test_menu_id: uuid.UUID,
+                          session: AsyncSession,
+                          r: Redis):
     redis: RedisDAO = RedisDAO(r)
-    data = redis.get(request.url.path + request.method)
+    data = await redis.get(request.url.path + request.method)
     if data:
         return pickle.loads(data)
-    menu = MC.get_menu_by_id(api_test_menu_id, session)
-    if menu:
-        submenus: list[BaseSubmenu] | None = menu.submenu
-        if submenus:
-            for elem in submenus:
-                add_dish_number_to_submenu(session, elem)
-        redis.set(key=request.url.path + request.method, value=pickle.dumps(submenus),
-                  expire_time=settings.REDIS_EXPIRE_TIME)
+    submenus = await SC.get_submenu_all_for_menu(api_test_menu_id, session)
+    if submenus:
+        for elem in submenus:
+            await add_dish_number_to_submenu(elem, session)
+        await redis.set(key=request.url.path + request.method, value=pickle.dumps(submenus),
+                        expire_time=settings.REDIS_EXPIRE_TIME)
         return submenus
     else:
         return []
 
 
-def get_submenu_by_id(request: Request,
-                      api_test_submenu_id: uuid.UUID,
-                      session: Session,
-                      r: Redis):
+async def get_submenu_by_id(request: Request,
+                            api_test_submenu_id: uuid.UUID,
+                            session: AsyncSession,
+                            r: Redis):
     redis: RedisDAO = RedisDAO(r)
-    data = redis.get(request.url.path + request.method)
+    data = await redis.get(request.url.path + request.method)
     if data:
         return pickle.loads(data)
 
-    submenu: SubmenuSchema | None = SC.get_submenu_by_id(api_test_submenu_id, session)
+    submenu: SubmenuSchema | None = await SC.get_submenu_by_id(api_test_submenu_id, session)
     if submenu:
-        add_dish_number_to_submenu(session, submenu)
-        redis.set(key=request.url.path + request.method, value=pickle.dumps(submenu),
-                  expire_time=settings.REDIS_EXPIRE_TIME)
+        await add_dish_number_to_submenu(submenu, session)
+        await redis.set(key=request.url.path + request.method, value=pickle.dumps(submenu),
+                        expire_time=settings.REDIS_EXPIRE_TIME)
         return submenu
     else:
         raise HTTPException(status_code=404, detail='submenu not found')
 
 
-def create_submenu(request: Request,
-                   api_test_menu_id: uuid.UUID,
-                   submenu: CreateSubmenu,
-                   session: Session,
-                   r: Redis):
+async def create_submenu(request: Request,
+                         api_test_menu_id: uuid.UUID,
+                         submenu: CreateSubmenu,
+                         session: AsyncSession,
+                         r: Redis,
+                         background_tasks):
     redis: RedisDAO = RedisDAO(r)
-    created_submenu: SubmenuSchema | None = SC.create_submenu(api_test_menu_id, submenu, session)
-    add_dish_number_to_submenu(session, created_submenu)
-    redis.unvalidate(request.url.path + 'GET',
-                     '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
-                     '/api/v1/menusGET')
+    created_submenu: SubmenuSchema | None = await SC.create_submenu(api_test_menu_id, submenu, session)
+    await add_dish_number_to_submenu(created_submenu, session)
+    path = [request.url.path + 'GET',
+            '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
+            '/api/v1/menusGET']
+    path += basepath
+    background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
     return created_submenu
 
 
-def update_submenu_by_id(request: Request,
-                         api_test_menu_id: uuid.UUID,
-                         api_test_submenu_id: uuid.UUID,
-                         submenu: CreateSubmenu,
-                         session: Session,
-                         r: Redis):
+async def update_submenu_by_id(request: Request,
+                               api_test_menu_id: uuid.UUID,
+                               api_test_submenu_id: uuid.UUID,
+                               submenu: CreateSubmenu,
+                               session: AsyncSession,
+                               r: Redis,
+                               background_tasks):
     redis: RedisDAO = RedisDAO(r)
-    submenu_id: uuid.UUID | None = SC.update_submenu_by_id(api_test_menu_id, api_test_submenu_id, submenu, session)
-    if submenu_id:
-        reterned_submenu: SubmenuSchema | None = SC.get_submenu_by_id(submenu_id, session)
-        if reterned_submenu:
-            # print(reterned_submenu)
-            add_dish_number_to_submenu(session, reterned_submenu)
-            redis.unvalidate(request.url.path + 'GET',
-                             '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
-                             '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
-                             '/api/v1/menusGET')
-            return reterned_submenu
+    updated_submenu: uuid.UUID | None = await SC.update_submenu_by_id(api_test_menu_id, api_test_submenu_id, submenu,
+                                                                      session)
+    if updated_submenu:
+        await add_dish_number_to_submenu(updated_submenu, session)
+        path = [request.url.path + 'GET',
+                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
+                '/api/v1/menusGET']
+        path += basepath
+        background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
+        return updated_submenu
     else:
         raise HTTPException(status_code=404, detail='submenu not found')
 
 
-def delete_submenu_by_id(request: Request,
-                         target_menu_id: uuid.UUID,
-                         target_submenu_id: uuid.UUID,
-                         session: Session,
-                         r: Redis):
+async def delete_submenu_by_id(request: Request,
+                               target_menu_id: uuid.UUID,
+                               target_submenu_id: uuid.UUID,
+                               session: AsyncSession,
+                               r: Redis,
+                               background_tasks):
     redis: RedisDAO = RedisDAO(r)
-    submenu = SC.delete_submenu_by_id(target_submenu_id, session)
+    submenu = await SC.delete_submenu_by_id(target_submenu_id, session)
     if submenu:
-        redis.unvalidate(request.url.path + 'GET',
-                         '/api/v1/menus/' + str(target_menu_id) + '/submenus' + 'GET',
-                         '/api/v1/menus/' + str(target_menu_id) + 'GET',
-                         '/api/v1/menusGET')
+        path = [request.url.path + 'GET',
+                '/api/v1/menus/' + str(target_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(target_menu_id) + 'GET',
+                '/api/v1/menusGET']
+        path += basepath
+        background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
         return {'status': True,
                 'message': 'The submenu has been deleted'}
     else:

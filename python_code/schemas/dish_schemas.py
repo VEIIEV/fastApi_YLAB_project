@@ -19,3 +19,4 @@ class DishSchema(BaseDish):
 
     class Config:
         from_attributes = True
+        exclude = {'id'}

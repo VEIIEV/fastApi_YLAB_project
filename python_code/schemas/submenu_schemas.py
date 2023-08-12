@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import BaseModel, Field
 
-from python_code.schemas.dish_schemas import BaseDish
+from python_code.schemas.dish_schemas import BaseDish, DishSchema
 
 
 class BaseSubmenu(BaseModel):
@@ -21,3 +21,13 @@ class SubmenuSchema(BaseSubmenu):
 
     class Config:
         from_attributes = True
+
+
+class SubmenuExpandedSchema(BaseSubmenu):
+    id: uuid.UUID
+    menu_id: uuid.UUID = Field(description='ref to his menu')
+    dishes: list[DishSchema] = []
+
+    class Config:
+        from_attributes = True
+        exclude = {'id'}

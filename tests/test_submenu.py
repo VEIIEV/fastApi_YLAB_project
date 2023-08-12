@@ -1,6 +1,5 @@
 import pytest
-import requests
-from requests import Response
+from httpx import AsyncClient, Response
 
 # чекер, если меню ещё не создано, то создаем и сохраняем его
 # если создано, то используем, без создания очередного меню
@@ -8,25 +7,23 @@ MENU = None
 
 
 @pytest.fixture(scope='module')
-def create_menu_for_test(get_host):
+async def create_menu_for_test(get_host, async_client: AsyncClient):
     global MENU
-    if MENU:
-        return MENU
-    else:
-        url = get_host + '/api/v1/menus'
+    url = get_host + '/api/v1/menus'
+    if not MENU:
         body = {
             'title': 'My menu 1',
             'description': 'My menu description 1'
         }
-        response: Response = requests.post(url=url, json=body)
+        response: Response = await async_client.post(url=url, json=body)
         MENU = response.json()
     yield MENU
     url = url + '/' + MENU['id']
-    requests.delete(url)
+    await async_client.delete(url)
 
 
-@pytest.fixture()
-def create_submenu_for_test(get_host, create_menu_for_test):
+@pytest.fixture(scope='function')
+async def create_submenu_for_test(get_host, create_menu_for_test, async_client: AsyncClient):
     # создаем сабменю
     menu_id = create_menu_for_test['id']
     url = get_host + '/api/v1/menus/' + menu_id + '/submenus'
@@ -34,34 +31,34 @@ def create_submenu_for_test(get_host, create_menu_for_test):
         'title': 'My submenu 1',
         'description': 'My submenu description 1'
     }
-    response: Response = requests.post(url=url, json=body)
+    response: Response = await async_client.post(url=url, json=body)
     yield response.json()
     # удаляем сабменю
     url = url + '/' + response.json()['id']
-    requests.delete(url)
+    await async_client.delete(url)
 
 
 # Положительные тесты
 
-def test_get_all_submenu(get_host, create_menu_for_test):
+async def test_get_all_submenu(get_host, create_menu_for_test, async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     url = get_host + '/api/v1/menus/' + menu_id + '/submenus'
     print(url)
-    response: Response = requests.get(url=url)
+    response: Response = await async_client.get(url=url)
     assert response.status_code == 200, 'check for status code'
 
 
-def test_get_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test):
+async def test_get_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test, async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
     url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id
     print(url)
-    response: Response = requests.get(url=url)
+    response: Response = await async_client.get(url=url)
     assert response.status_code == 200, 'check for status code'
     assert response.json()['dishes_count'] is not None, 'check for  "dishes_count" field existence'
 
 
-def test_create_submenu(get_host, create_menu_for_test):
+async def test_create_submenu(get_host, create_menu_for_test, async_client: AsyncClient):
     # создаем субменю
     menu_id = create_menu_for_test['id']
     url = get_host + '/api/v1/menus/' + menu_id + '/submenus'
@@ -69,17 +66,17 @@ def test_create_submenu(get_host, create_menu_for_test):
         'title': 'My submenu 1',
         'description': 'My submenu description 1'
     }
-    response: Response = requests.post(url=url, json=body)
+    response: Response = await async_client.post(url=url, json=body)
     assert response.status_code == 201, 'check for status code'
     assert response.json()['title'] == body['title'], 'check for retrieved submenu(title) accordance'
     assert response.json()['description'] == body['description'], 'check for retrieved submenu(description) accordance'
     assert response.json()['dishes_count'] is not None, 'check for  "dishes_count" field existence'
     # удаляем сабменю
     url = url + '/' + response.json()['id']
-    requests.delete(url)
+    await async_client.delete(url)
 
 
-def test_update_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test):
+async def test_update_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test, async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
     url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id
@@ -87,16 +84,16 @@ def test_update_submenu_by_id(get_host, create_menu_for_test, create_submenu_for
         'title': 'My submenu 1',
         'description': 'updated description'
     }
-    response: Response = requests.patch(url=url, json=body)
+    response: Response = await async_client.patch(url=url, json=body)
     assert response.status_code == 200, 'check for status code'
     assert response.json()['description'] == body['description'], 'check for retrieved submenu(description) accordance'
     assert response.json()['dishes_count'] is not None, 'check for  "dishes_count" field existence'
 
 
-def test_delete_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test):
+async def test_delete_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test, async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
     url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id
-    response: Response = requests.delete(url=url)
+    response: Response = await async_client.delete(url=url)
     assert response.status_code == 200, 'check for status code'
     assert response.json()['message'] == 'The submenu has been deleted', 'checking for message content'

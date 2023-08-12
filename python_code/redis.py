@@ -1,14 +1,16 @@
 from enum import Enum
 
-import redis
+import aioredis
+from redis.asyncio.client import Redis
 
 from python_code.config import settings
 
 
-def get_redis_connection():
-    return redis.StrictRedis(port=settings.REDIS_PORT, host=settings.REDIS_HOST,
-                             # encoding='utf8', пока без кодировки
-                             decode_responses=False, db=0)
+async def get_redis_connection():
+    connection: Redis = await aioredis.Redis(port=settings.REDIS_PORT, host=settings.REDIS_HOST,
+                                             # encoding='utf8', пока без кодировки
+                                             decode_responses=False, db=0)
+    return connection
 
 
 class RedisTable(Enum):

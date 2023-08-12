@@ -2,60 +2,62 @@ import uuid
 from typing import Sequence
 
 import sqlalchemy as sa
-from sqlalchemy import Result, Select
-from sqlalchemy.orm import Session
+from sqlalchemy import Select
+from sqlalchemy.ext.asyncio import AsyncResult, AsyncSession
 
 from python_code.models.dish_model import Dish
 from python_code.schemas.dish_schemas import CreateDish, DishSchema
 
 
-def get_dish_all(session: Session) -> Sequence[DishSchema]:
-    result: Result = session.execute(sa.select(Dish))
+async def get_dish_all(session: AsyncSession) -> list[DishSchema]:
+    result: AsyncResult = await session.execute(sa.select(Dish))
     return result.scalars().all()
 
 
-def get_dish_for_submenu_all(submenu_id: uuid.UUID, session: Session) -> Sequence[DishSchema]:
-    result: Result = session.execute(sa.select(Dish).where(Dish.submenu_id == submenu_id))
+async def get_dish_for_submenu_all(submenu_id: uuid.UUID, session: AsyncSession) -> Sequence[DishSchema]:
+    result: AsyncResult = await session.execute(sa.select(Dish).where(Dish.submenu_id == submenu_id))
     return result.scalars().all()
 
 
-def get_dish_by_id(id: uuid.UUID, session: Session) -> DishSchema | None:
-    result = session.execute(sa.select(Dish).where(Dish.id == id))
+async def get_dish_by_id(id: uuid.UUID, session: AsyncSession) -> DishSchema | None:
+    result = await session.execute(sa.select(Dish).filter_by(id=id))
     return result.scalar()
 
 
-def is_exist_dish(title: str, session: Session) -> bool:
+async def is_exist_dish(title: str, session: AsyncSession) -> bool:
     smtp: Select = sa.select(Dish.id).join(Dish.submenu).where(Dish.title == title)
-    checker = session.execute(smtp).scalar()
+    checker = await session.execute(smtp)
     if checker:
         return True
     else:
         return False
 
 
-def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: Session) -> DishSchema | None:
-    result: Result = session.execute(sa.insert(Dish).returning(Dish),
-                                     [{'title': dish.title,
-                                       'description': dish.description,
-                                       'price': dish.price,
-                                       'submenu_id': submenu_id}])
-    session.commit()
+async def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: AsyncSession) -> DishSchema | None:
+    result: AsyncResult = await session.execute(sa.insert(Dish).returning(Dish),
+                                                [{'title': dish.title,
+                                                  'description': dish.description,
+                                                  'price': dish.price,
+                                                  'submenu_id': submenu_id}])
+    await session.commit()
     return result.scalar()
 
 
-def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish, session: Session) -> uuid.UUID | None:
-    result: Result = session.connection().execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish),
-                                                  [{'title': dish.title,
-                                                    'description': dish.description,
-                                                    'price': dish.price,
-                                                    'submenu_id': submenu_id}])
-    session.commit()
+# todo чёт тут какая-то ёбань
+async def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish,
+                            session: AsyncSession):
+    result = await session.execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish).values(
+        title=dish.title,
+        description=dish.description,
+        price=dish.price,
+        submenu_id=submenu_id))
+    await session.commit()
     return result.scalar()
 
 
-def delete_dish_by_id(id: uuid.UUID, session: Session) -> DishSchema | None:
-    result: Result = session.execute(sa.delete(Dish).returning(Dish).where(Dish.id == id))
-    session.commit()
+async def delete_dish_by_id(id: uuid.UUID, session: AsyncSession) -> DishSchema | None:
+    result: AsyncResult = await session.execute(sa.delete(Dish).returning(Dish).where(Dish.id == id))
+    await session.commit()
     return result.scalar()
 
 # def create_dish(dish, se)
