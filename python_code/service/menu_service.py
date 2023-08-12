@@ -1,5 +1,6 @@
 import pickle
 import uuid
+from pprint import pprint
 from typing import Sequence
 
 from fastapi import BackgroundTasks, HTTPException
@@ -11,8 +12,24 @@ from python_code.config import settings
 from python_code.cruds import menu_crud as MC
 from python_code.dao.redis_dao import RedisDAO
 from python_code.models.menu_model import Menu
-from python_code.schemas.menu_schemas import CreateMenu, MenuSchema
+from python_code.schemas.menu_schemas import CreateMenu, MenuExpandedSchema, MenuSchema
 from python_code.utils import add_counters_to_response, unvalidate_cache
+
+basepath = ['/api/v1/menus/expandedGET']
+
+
+async def get_all_menu_expanded(r: Redis,
+                                request: Request,
+                                session: AsyncSession):
+    redis: RedisDAO = RedisDAO(r)
+    data = await redis.get(request.url.path + request.method)
+    if data:
+        return pickle.loads(data)
+    menu: Sequence[MenuExpandedSchema] = await MC.get_menu_all_expanded(session)
+    pprint(menu)
+    await redis.set(key=request.url.path + request.method, value=pickle.dumps(menu),
+                    expire_time=settings.REDIS_EXPIRE_TIME)
+    return menu
 
 
 async def find_all_menu(r: Redis,
@@ -57,6 +74,7 @@ async def create_menu(menu: CreateMenu,
     created_menu: MenuSchema | None = await MC.create_menu(menu, session)
     await add_counters_to_response(created_menu, session)
     path = [request.url.path + 'GET', ]
+    path += basepath
     background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
     return created_menu
 
@@ -74,6 +92,7 @@ async def update_menu_by_id(menu: CreateMenu,
         path = [
             request.url.path + 'GET',
             '/api/v1/menusGET']
+        path += basepath
         background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
         return updated_menu
     else:
@@ -91,6 +110,7 @@ async def delete_menu_by_id(request: Request,
         path = [
             request.url.path + 'GET',
             '/api/v1/menusGET']
+        path += basepath
         background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
         return {'status': True,
                 'message': 'The menu has been deleted'}

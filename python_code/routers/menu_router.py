@@ -12,6 +12,7 @@ from python_code.service.menu_service import (
     delete_menu_by_id,
     find_all_menu,
     find_menu_by_id,
+    get_all_menu_expanded,
     update_menu_by_id,
 )
 
@@ -21,6 +22,19 @@ router = APIRouter(
 )
 
 
+@router.get('/api/v1/menus/expanded',
+            summary='get expanded info about all menu',
+            response_description='The nested list that stores information about all submenus and dishes, '
+                                 'if empty return []')
+async def get_all_menu_expanded_endpoint(request: Request,
+                                         session: AsyncSession = Depends(get_async_session),
+                                         r: Redis = Depends(get_redis_connection)):
+    """
+    Return nexted list with detail info about all menu
+    """
+    return await get_all_menu_expanded(r, request, session)
+
+
 @router.get('/api/v1/menus',
             summary='get all menu',
             response_description='list of all menu, if empty return []')
@@ -28,7 +42,7 @@ async def get_all_menu_endpoint(request: Request,
                                 session: AsyncSession = Depends(get_async_session),
                                 r: Redis = Depends(get_redis_connection)):
     """
-    Return dishes with all the information:
+    Return list of menu with all the information:
     - **title**:
     - **description**:
     - **own_id**:

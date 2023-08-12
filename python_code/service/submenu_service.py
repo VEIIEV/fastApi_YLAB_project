@@ -12,6 +12,8 @@ from python_code.dao.redis_dao import RedisDAO
 from python_code.schemas.submenu_schemas import CreateSubmenu, SubmenuSchema
 from python_code.utils import add_dish_number_to_submenu, unvalidate_cache
 
+basepath = ['/api/v1/menus/expandedGET']
+
 
 async def get_all_submenu(request: Request,
                           api_test_menu_id: uuid.UUID,
@@ -63,6 +65,7 @@ async def create_submenu(request: Request,
     path = [request.url.path + 'GET',
             '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
             '/api/v1/menusGET']
+    path += basepath
     background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
     return created_submenu
 
@@ -83,8 +86,8 @@ async def update_submenu_by_id(request: Request,
                 '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
                 '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
                 '/api/v1/menusGET']
+        path += basepath
         background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
-
         return updated_submenu
     else:
         raise HTTPException(status_code=404, detail='submenu not found')
@@ -103,8 +106,8 @@ async def delete_submenu_by_id(request: Request,
                 '/api/v1/menus/' + str(target_menu_id) + '/submenus' + 'GET',
                 '/api/v1/menus/' + str(target_menu_id) + 'GET',
                 '/api/v1/menusGET']
+        path += basepath
         background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
-
         return {'status': True,
                 'message': 'The submenu has been deleted'}
     else:

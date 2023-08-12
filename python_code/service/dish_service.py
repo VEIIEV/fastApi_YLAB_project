@@ -13,6 +13,8 @@ from python_code.dao.redis_dao import RedisDAO
 from python_code.schemas.dish_schemas import CreateDish, DishSchema
 from python_code.utils import round_price, unvalidate_cache
 
+basepath = ['/api/v1/menus/expandedGET']
+
 
 async def get_all_dishes(request: Request,
                          api_test_submenu_id: uuid.UUID,
@@ -68,6 +70,7 @@ async def create_dish(request: Request,
                 '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
                 '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
                 '/api/v1/menusGET']
+        path += basepath
         background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
         return returned_dish
     else:
@@ -94,6 +97,7 @@ async def update_dish(request: Request,
                 '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
                 '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
                 '/api/v1/menusGET']
+        path += basepath
         background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
         return updated_dish
     else:
@@ -118,6 +122,7 @@ async def delete_dish(request: Request,
                 '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
                 '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
                 '/api/v1/menusGET']
+        path += basepath
         background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
         return {'status': True,
                 'message': 'The dish has been deleted'}

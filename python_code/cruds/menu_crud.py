@@ -3,12 +3,22 @@ from typing import Sequence
 
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncResult, AsyncSession
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.expression import func
 
 from python_code.models.dish_model import Dish
 from python_code.models.menu_model import Menu
 from python_code.models.submenu_model import Submenu
-from python_code.schemas.menu_schemas import CreateMenu, MenuSchema
+from python_code.schemas.menu_schemas import CreateMenu, MenuExpandedSchema, MenuSchema
+
+
+async def get_menu_all_expanded(session: AsyncSession) -> Sequence[MenuExpandedSchema]:
+    result: AsyncResult = await session.execute(
+        sa.select(Menu, Submenu, Dish)
+        .outerjoin(Menu.submenu)
+        .outerjoin(Submenu.dishes)
+        .options(joinedload(Menu.submenu).joinedload(Submenu.dishes)))
+    return result.unique().scalars().all()
 
 
 async def get_menu_all(session: AsyncSession) -> Sequence[Menu]:

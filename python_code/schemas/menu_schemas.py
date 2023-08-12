@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import BaseModel, Field
 
-from python_code.schemas.submenu_schemas import BaseSubmenu
+from python_code.schemas.submenu_schemas import BaseSubmenu, SubmenuExpandedSchema
 
 
 class BaseMenu(BaseModel):
@@ -17,6 +17,14 @@ class CreateMenu(BaseMenu):
 class MenuSchema(BaseMenu):
     id: uuid.UUID
     submenu: list[BaseSubmenu] = []
+
+    class Config:
+        from_attributes = True
+
+
+class MenuExpandedSchema(BaseMenu):
+    id: uuid.UUID
+    submenu: list[SubmenuExpandedSchema] = []
 
     class Config:
         from_attributes = True
