@@ -59,6 +59,18 @@ async def create_dish_for_test(get_host, create_menu_for_test,
     await async_client.delete(url)
 
 
+async def test_get_all_menu_expanded(get_host, create_menu_for_test,
+                                     create_submenu_for_test,
+                                     create_dish_for_test,
+                                     async_client: AsyncClient):
+    url = get_host + '/api/v1/menus/expanded'
+    response: Response = await async_client.get(url=url)
+    assert response.status_code == 200, 'check for status code'
+    assert len(response.json()[0]['submenu']) == 1, 'check submenu exist'
+    assert len(response.json()[0]['submenu'][0]['dishes']) == 1, 'check submenu exist'
+    assert response.json()[0]['submenu'][0]['dishes'][0]['title'] == 'My dish 1', 'check dishes display correct '
+
+
 async def test_get_all_dishes(get_host, create_menu_for_test,
                               create_submenu_for_test,
                               async_client: AsyncClient):
