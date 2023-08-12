@@ -32,5 +32,4 @@ async def add_counters_to_response(menu, session: AsyncSession) -> None:
 async def unvalidate_cache(redis: RedisDAO, path: list[str], request: str = 'unknown'):
     await redis.unvalidate(*path)
     # funcname = inspect.currentframe().f_back.f_code.co_name
-    main_logger.info(f'data unvalidated via {request}  for listed path: {path}')
-    print(f'data unvalidated for listed path: {path}')
+    main_logger.info(f'data unvalidated via {request} \nfor listed path: {path}')

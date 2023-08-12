@@ -10,7 +10,7 @@ from python_code.config import settings
 from python_code.cruds import submenu_crud as SC
 from python_code.dao.redis_dao import RedisDAO
 from python_code.schemas.submenu_schemas import CreateSubmenu, SubmenuSchema
-from python_code.utils import add_dish_number_to_submenu
+from python_code.utils import add_dish_number_to_submenu, unvalidate_cache
 
 
 async def get_all_submenu(request: Request,
@@ -55,13 +55,15 @@ async def create_submenu(request: Request,
                          api_test_menu_id: uuid.UUID,
                          submenu: CreateSubmenu,
                          session: AsyncSession,
-                         r: Redis):
+                         r: Redis,
+                         background_tasks):
     redis: RedisDAO = RedisDAO(r)
     created_submenu: SubmenuSchema | None = await SC.create_submenu(api_test_menu_id, submenu, session)
     await add_dish_number_to_submenu(created_submenu, session)
-    await redis.unvalidate(request.url.path + 'GET',
-                           '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
-                           '/api/v1/menusGET')
+    path = [request.url.path + 'GET',
+            '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
+            '/api/v1/menusGET']
+    background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
     return created_submenu
 
 
@@ -70,17 +72,19 @@ async def update_submenu_by_id(request: Request,
                                api_test_submenu_id: uuid.UUID,
                                submenu: CreateSubmenu,
                                session: AsyncSession,
-                               r: Redis):
+                               r: Redis,
+                               background_tasks):
     redis: RedisDAO = RedisDAO(r)
     updated_submenu: uuid.UUID | None = await SC.update_submenu_by_id(api_test_menu_id, api_test_submenu_id, submenu,
                                                                       session)
     if updated_submenu:
-        # print(reterned_submenu)
         await add_dish_number_to_submenu(updated_submenu, session)
-        await redis.unvalidate(request.url.path + 'GET',
-                               '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
-                               '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
-                               '/api/v1/menusGET')
+        path = [request.url.path + 'GET',
+                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
+                '/api/v1/menusGET']
+        background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
+
         return updated_submenu
     else:
         raise HTTPException(status_code=404, detail='submenu not found')
@@ -90,14 +94,17 @@ async def delete_submenu_by_id(request: Request,
                                target_menu_id: uuid.UUID,
                                target_submenu_id: uuid.UUID,
                                session: AsyncSession,
-                               r: Redis):
+                               r: Redis,
+                               background_tasks):
     redis: RedisDAO = RedisDAO(r)
     submenu = await SC.delete_submenu_by_id(target_submenu_id, session)
     if submenu:
-        await redis.unvalidate(request.url.path + 'GET',
-                               '/api/v1/menus/' + str(target_menu_id) + '/submenus' + 'GET',
-                               '/api/v1/menus/' + str(target_menu_id) + 'GET',
-                               '/api/v1/menusGET')
+        path = [request.url.path + 'GET',
+                '/api/v1/menus/' + str(target_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(target_menu_id) + 'GET',
+                '/api/v1/menusGET']
+        background_tasks.add_task(unvalidate_cache, redis, path, request.method + ':' + request.url.path)
+
         return {'status': True,
                 'message': 'The submenu has been deleted'}
     else:

@@ -2,7 +2,7 @@ import uuid
 from typing import Annotated
 
 from aioredis.client import Redis
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
@@ -63,6 +63,7 @@ async def get_dish_by_id_endpoint(request: Request,
 async def create_dish_endpoint(request: Request,
                                api_test_menu_id: uuid.UUID,
                                api_test_submenu_id: uuid.UUID,
+                               background_tasks: BackgroundTasks,
                                session: AsyncSession = Depends(get_async_session),
                                r: Redis = Depends(get_redis_connection),
                                dish: CreateDish = Body(example={
@@ -78,7 +79,9 @@ async def create_dish_endpoint(request: Request,
     - **own_id**:
     - **submenu_id**:
     """
-    return await create_dish(request, api_test_menu_id, api_test_submenu_id, dish, session, r)
+    return await create_dish(request, api_test_menu_id,
+                             api_test_submenu_id,
+                             dish, session, r, background_tasks)
 
 
 @router.patch('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes/{api_test_dish_id}',
@@ -88,6 +91,7 @@ async def update_dish_endpoint(request: Request,
                                api_test_submenu_id: uuid.UUID,
                                api_test_dish_id: uuid.UUID,
                                dish: CreateDish,
+                               background_tasks: BackgroundTasks,
                                session: AsyncSession = Depends(get_async_session),
                                r: Redis = Depends(get_redis_connection)):
     """
@@ -99,7 +103,9 @@ async def update_dish_endpoint(request: Request,
     - **own_id**:
     - **submenu_id**:
     """
-    return await update_dish(request, api_test_menu_id, api_test_submenu_id, api_test_dish_id, dish, session, r)
+    return await update_dish(request, api_test_menu_id,
+                             api_test_submenu_id, api_test_dish_id,
+                             dish, session, r, background_tasks)
 
 
 @router.delete('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes/{api_test_dish_id}',
@@ -108,13 +114,16 @@ async def delete_dish_endpoint(request: Request,
                                api_test_menu_id: uuid.UUID,
                                api_test_submenu_id: uuid.UUID,
                                api_test_dish_id: uuid.UUID,
+                               background_tasks: BackgroundTasks,
                                session: AsyncSession = Depends(get_async_session),
                                r: Redis = Depends(get_redis_connection)):
     """
     if exist delete selected dish and return confirm message
     else return 404
     """
-    return await delete_dish(request, api_test_menu_id, api_test_submenu_id, api_test_dish_id, session, r)
+    return await delete_dish(request, api_test_menu_id,
+                             api_test_submenu_id, api_test_dish_id,
+                             session, r, background_tasks)
 
 
 @router.get('/api/v1/menus/{api_test_menu_id}/submenus/{api_test_submenu_id}/dishes/check/{title}',
