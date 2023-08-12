@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from redis.asyncio.client import Redis  # type ignore[import]"
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -57,6 +57,7 @@ async def get_menu_by_id_endpoint(request: Request,
              summary='create menu')
 async def create_menu_endpoint(request: Request,
                                menu: CreateMenu,
+                               background_tasks: BackgroundTasks,
                                session: AsyncSession = Depends(get_async_session),
                                r: Redis = Depends(get_redis_connection)):
     """
@@ -66,7 +67,7 @@ async def create_menu_endpoint(request: Request,
     - **own_id**:
     - **submenu's list**:
     """
-    return await create_menu(menu, r, request, session)
+    return await create_menu(menu, r, request, session, background_tasks)
 
 
 @router.patch('/api/v1/menus/{api_test_menu_id}',
@@ -74,6 +75,7 @@ async def create_menu_endpoint(request: Request,
 async def update_menu_by_id_endpoint(request: Request,
                                      api_test_menu_id: uuid.UUID,
                                      menu: CreateMenu,
+                                     background_tasks: BackgroundTasks,
                                      session: AsyncSession = Depends(get_async_session),
                                      r: Redis = Depends(get_redis_connection)):
     """
@@ -84,17 +86,18 @@ async def update_menu_by_id_endpoint(request: Request,
     - **own_id**:
     - **submenu's list**:
     """
-    return await update_menu_by_id(menu, api_test_menu_id, r, request, session)
+    return await update_menu_by_id(menu, api_test_menu_id, r, request, session, background_tasks)
 
 
 @router.delete('/api/v1/menus/{api_test_menu_id}',
                summary='delete menu')
 async def delete_menu_by_id_endpoint(request: Request,
                                      api_test_menu_id: uuid.UUID,
+                                     background_tasks: BackgroundTasks,
                                      session: AsyncSession = Depends(get_async_session),
                                      r: Redis = Depends(get_redis_connection)):
     """
     if exist delete selected menu and return confirm message
     else return 404
     """
-    return await delete_menu_by_id(request, api_test_menu_id, session, r)
+    return await delete_menu_by_id(request, api_test_menu_id, session, r, background_tasks)

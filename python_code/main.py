@@ -18,7 +18,7 @@ app.include_router(submenu_router.router)
 app.include_router(dish_router.router)
 
 
-# TODO  для каждой ручки написать  самари описание и респонс модел
+# todo логировать анвалидацию кеша
 # TODO написать конструктор url адреса
 
 @app.on_event('startup')

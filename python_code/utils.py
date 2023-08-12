@@ -2,6 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
+from python_code.dao.redis_dao import RedisDAO
+from python_code.logger import main_logger
 from python_code.schemas.dish_schemas import BaseDish, DishSchema
 
 
@@ -25,3 +27,10 @@ async def add_counters_to_response(menu, session: AsyncSession) -> None:
     dishes_count = await MC.count_dishes(menu.id, session)
     menu.__setattr__('submenus_count', submenus_count)
     menu.__setattr__('dishes_count', dishes_count)
+
+
+async def unvalidate_cache(redis: RedisDAO, path: list[str], request: str = 'unknown'):
+    await redis.unvalidate(*path)
+    # funcname = inspect.currentframe().f_back.f_code.co_name
+    main_logger.info(f'data unvalidated via {request}  for listed path: {path}')
+    print(f'data unvalidated for listed path: {path}')
