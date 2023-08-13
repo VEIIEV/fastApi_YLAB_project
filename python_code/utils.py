@@ -1,10 +1,96 @@
+import asyncio
+import os
+
+import httpx
+import openpyxl
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
 from python_code.dao.redis_dao import RedisDAO
 from python_code.logger import main_logger
+from python_code.my_celery.celery_main import celery_app
 from python_code.schemas.dish_schemas import BaseDish, DishSchema
+
+
+def read_excel():
+    """
+    parse excel file and get:
+    ~=list[Menu]
+    ~=list[Submenu]
+    ~=list[Dish]
+    """
+
+    # Получаем текущую директорию скрипта
+    current_directory = os.getcwd()
+
+    # Строим путь к файлу относительно текущей директории
+    excel_filepath = os.path.join(current_directory, 'Menu.xlsx')
+    wb = openpyxl.load_workbook(excel_filepath)
+    sheet = wb.active
+
+    menus = []
+    submenus = []
+    dishes = []
+
+    row = 1
+    while row <= sheet.max_row:
+        if (sheet.cell(row=row, column=1).value
+                and type(sheet.cell(row=row, column=1).value) == str):  # Новое меню
+            menu = {
+                'uuid': sheet.cell(row=row, column=1).value,
+                'title': sheet.cell(row=row, column=2).value,
+                'description': sheet.cell(row=row, column=3).value
+            }
+            menus.append(menu)
+            row += 1
+
+            while (row <= sheet.max_row
+                   and not type(sheet.cell(row=row, column=1).value) == str):  # Подменю
+                if (sheet.cell(row=row, column=2).value
+                        and type(sheet.cell(row=row, column=2).value) == str):
+                    submenu = {
+                        'uuid': sheet.cell(row=row, column=2).value,
+                        'title': sheet.cell(row=row, column=3).value,
+                        'description': sheet.cell(row=row, column=4).value,
+                        'menu_uuid': menu['uuid']
+                    }
+                    submenus.append(submenu)
+                    row += 1
+
+                    while (row <= sheet.max_row
+                           and not isinstance(sheet.cell(row=row, column=1).value, str)
+                           and not isinstance(sheet.cell(row=row, column=2).value, str)):  # Блюдо
+                        base_price_value = sheet.cell(row=row, column=6).value
+                        t = type(sheet.cell(row=row, column=7).value)
+                        print(t)
+                        discount = sheet.cell(row=row, column=7).value if type(
+                            sheet.cell(row=row, column=7).value) == str else 1.0
+                        discount = 1 - float(discount)
+                        # price_value = float(base_price_value.replace(',', '.'))
+                        price_value = float(base_price_value)
+                        price_value = price_value * discount
+
+                        dish = {
+                            'uuid': sheet.cell(row=row, column=3).value,
+                            'title': sheet.cell(row=row, column=4).value,
+                            'description': sheet.cell(row=row, column=5).value,
+                            'price': price_value,
+                            'submenu_uuid': submenu['uuid'],
+                            'menu_uuid': menu['uuid']  # Добавляем информацию о меню
+                        }
+                        dishes.append(dish)
+                        row += 1
+                else:
+                    row += 1
+        else:
+            row += 1
+
+    return menus, submenus, dishes
+
+
+def update_db_from_excel():
+    pass
 
 
 def round_price(dish: DishSchema | BaseDish | None) -> None:

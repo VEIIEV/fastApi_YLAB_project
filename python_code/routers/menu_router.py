@@ -15,12 +15,17 @@ from python_code.service.menu_service import (
     get_all_menu_expanded,
     update_menu_by_id,
 )
+from python_code.utils import update_db_from_excel, read_excel
 
 router = APIRouter(
     tags=['menu'],
     responses={404: {'details': 'Menu not found'}},
 )
 
+# todo delete later
+@router.get('/api/v1/menus/adb')
+def update_db():
+   return read_excel()
 
 @router.get('/api/v1/menus/expanded',
             summary='get expanded info about all menu',
