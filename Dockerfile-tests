@@ -11,8 +11,8 @@ COPY ./tests .
 
 # Install dependencies
 
-RUN pip install pytest requests python-dotenv
+RUN pip install pytest httpx python-dotenv asyncio pytest-asyncio
 
 # Run pytest when the container launches
 
-ENTRYPOINT ["pytest"]
+ENTRYPOINT sleep 10 && pytest

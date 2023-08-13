@@ -18,8 +18,8 @@ app.include_router(submenu_router.router)
 app.include_router(dish_router.router)
 
 
-# todo логировать анвалидацию кеша
 # TODO написать конструктор url адреса
+# todo переписать репозитории под классы, которые наследуются от одного абстрактоного репозитория
 
 @app.on_event('startup')
 async def on_startup():
