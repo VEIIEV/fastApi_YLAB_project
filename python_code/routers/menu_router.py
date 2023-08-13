@@ -26,7 +26,8 @@ router = APIRouter(
             summary='get expanded info about all menu',
             response_description='The nested list that stores information about all submenus and dishes, '
                                  'if empty return []',
-            response_model=list[MenuExpandedSchema])
+            # response_model=list[MenuExpandedSchema]
+            )
 async def get_all_menu_expanded_endpoint(request: Request,
                                          session: AsyncSession = Depends(get_async_session),
                                          r: Redis = Depends(get_redis_connection)):

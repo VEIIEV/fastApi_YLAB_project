@@ -12,7 +12,7 @@ from python_code.models.submenu_model import Submenu
 from python_code.schemas.menu_schemas import CreateMenu, MenuExpandedSchema, MenuSchema
 
 
-async def get_menu_all_expanded(session: AsyncSession) -> Sequence[MenuExpandedSchema]:
+async def get_menu_all_expanded(session: AsyncSession) -> Sequence[Menu]:
     result: AsyncResult = await session.execute(
         sa.select(Menu, Submenu, Dish)
         .outerjoin(Menu.submenu)

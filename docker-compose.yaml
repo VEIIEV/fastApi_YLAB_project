@@ -2,6 +2,7 @@ version: "3.7"
 
 services:
 
+
   redis:
     image: redis:latest
     restart: always
@@ -16,7 +17,7 @@ services:
     image: postgres:15.1-alpine
     container_name: db-app
     env_file:
-      - .env
+      - .env.no
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -36,7 +37,7 @@ services:
       dockerfile: Dockerfile
     container_name: ylab_fastApi_app_with_tests
     env_file:
-      - .env
+      - .env.no
     ports:
       - "8000:8000"
     depends_on:
@@ -44,6 +45,34 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+
+  rabbitmq:
+    image: "rabbitmq"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:  celery -A python_code.my_celery.celery_main worker --loglevel=DEBUG
+    depends_on:
+      - app
+      - rabbitmq
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:  celery -A python_code.my_celery.celery_main beat --loglevel=DEBUG
+    depends_on:
+      - app
+      - rabbitmq
+
 
   pytest:
     build:

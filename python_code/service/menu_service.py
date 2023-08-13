@@ -25,7 +25,7 @@ async def get_all_menu_expanded(r: Redis,
     data = await redis.get(request.url.path + request.method)
     if data:
         return pickle.loads(data)
-    menu: Sequence[MenuExpandedSchema] = await MC.get_menu_all_expanded(session)
+    menu: Sequence[Menu] = await MC.get_menu_all_expanded(session)
     pprint(menu)
     await redis.set(key=request.url.path + request.method, value=pickle.dumps(menu),
                     expire_time=settings.REDIS_EXPIRE_TIME)
