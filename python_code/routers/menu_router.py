@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from python_code.db import get_async_session
 from python_code.redis import get_redis_connection
-from python_code.schemas.menu_schemas import CreateMenu
+from python_code.schemas.menu_schemas import CreateMenu, MenuExpandedSchema
 from python_code.service.menu_service import (
     create_menu,
     delete_menu_by_id,
@@ -25,7 +25,8 @@ router = APIRouter(
 @router.get('/api/v1/menus/expanded',
             summary='get expanded info about all menu',
             response_description='The nested list that stores information about all submenus and dishes, '
-                                 'if empty return []')
+                                 'if empty return []',
+            response_model=list[MenuExpandedSchema])
 async def get_all_menu_expanded_endpoint(request: Request,
                                          session: AsyncSession = Depends(get_async_session),
                                          r: Redis = Depends(get_redis_connection)):

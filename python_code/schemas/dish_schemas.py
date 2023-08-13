@@ -14,7 +14,6 @@ class CreateDish(BaseDish):
 
 
 class DishSchema(BaseDish):
-    id: uuid.UUID
     submenu_id: uuid.UUID = Field(description='ref to his submenu')
 
     class Config:

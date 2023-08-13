@@ -24,7 +24,6 @@ class SubmenuSchema(BaseSubmenu):
 
 
 class SubmenuExpandedSchema(BaseSubmenu):
-    id: uuid.UUID
     menu_id: uuid.UUID = Field(description='ref to his menu')
     dishes: list[DishSchema] = []
 

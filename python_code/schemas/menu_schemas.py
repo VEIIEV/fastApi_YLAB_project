@@ -23,7 +23,6 @@ class MenuSchema(BaseMenu):
 
 
 class MenuExpandedSchema(BaseMenu):
-    id: uuid.UUID
     submenu: list[SubmenuExpandedSchema] = []
 
     class Config:
