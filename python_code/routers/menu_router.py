@@ -1,6 +1,5 @@
 import uuid
 
-from asyncpg import ForeignKeyViolationError
 from fastapi import APIRouter, BackgroundTasks, Depends, Request, HTTPException
 from redis.asyncio.client import Redis  # type ignore[import]"
 from sqlalchemy.exc import IntegrityError
@@ -45,7 +44,6 @@ async def update_db(session: AsyncSession = Depends(get_async_session)):
             summary='get expanded info about all menu',
             response_description='The nested list that stores information about all dishes and dishes, '
                                  'if empty return []',
-            # response_model=list[MenuExpandedSchema]
             )
 async def get_all_menu_expanded_endpoint(request: Request,
                                          session: AsyncSession = Depends(get_async_session),

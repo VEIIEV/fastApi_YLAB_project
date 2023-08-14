@@ -29,7 +29,7 @@ async def get_submenu_by_id(id: uuid.UUID, session: AsyncSession) -> SubmenuSche
     return result.scalar()
 
 
-async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu, session: AsyncSession) -> SubmenuSchema | None:
+async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu, session: AsyncSession) -> Submenu | None:
     created_submenu = await session.execute(sa.insert(Submenu).returning(Submenu),
                                             [{'title': submenu.title,
                                               'description': submenu.description,

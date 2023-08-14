@@ -17,6 +17,7 @@ async def create_menu_for_test(get_host, async_client: AsyncClient):
         }
         response: Response = await async_client.post(url=url, json=body)
         MENU = response.json()
+    print(MENU)
     yield MENU
     url = url + '/' + MENU['id']
     await async_client.delete(url)
@@ -32,6 +33,7 @@ async def create_submenu_for_test(get_host, create_menu_for_test, async_client: 
         'description': 'My submenu description 1'
     }
     response: Response = await async_client.post(url=url, json=body)
+    print(response)
     yield response.json()
     # удаляем сабменю
     url = url + '/' + response.json()['id']
