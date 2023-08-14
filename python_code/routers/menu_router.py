@@ -1,12 +1,14 @@
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from asyncpg import ForeignKeyViolationError
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, HTTPException
 from redis.asyncio.client import Redis  # type ignore[import]"
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from python_code.db import get_async_session
 from python_code.redis import get_redis_connection
-from python_code.schemas.menu_schemas import CreateMenu, MenuExpandedSchema
+from python_code.schemas.menu_schemas import CreateMenu
 from python_code.service.menu_service import (
     create_menu,
     delete_menu_by_id,
@@ -15,7 +17,7 @@ from python_code.service.menu_service import (
     get_all_menu_expanded,
     update_menu_by_id,
 )
-from python_code.utils import update_db_from_excel, read_excel
+from python_code.utils import read_excel, update_db_from_excel
 
 router = APIRouter(
     tags=['menu'],
@@ -26,8 +28,17 @@ router = APIRouter(
 # todo delete later
 @router.get('/api/v1/menus/adb')
 async def update_db(session: AsyncSession = Depends(get_async_session)):
-    menus_data, submenus_data, dishes_data = read_excel()
-    return  await update_db_from_excel(menus_data, submenus_data, dishes_data, session)
+    try:
+        menus_data, submenus_data, dishes_data = read_excel()
+        response = await update_db_from_excel(menus_data, submenus_data, dishes_data, session)
+        print(response)
+        return response
+    except IntegrityError as e:
+        raise HTTPException(status_code=404,
+                            detail='всё впорядке, но есть одно но, uuid генерируется сам собой, и он очевидно не будет совпадать '
+                                   'с тем что находится в excel, если хотите что бы оно работало, заходите в excel и ручками прописывайте'
+                                   'uuid для каждой созданной в бд менюшке'
+                                   'потом для под менюшки, а потом все будет работать')
 
 
 @router.get('/api/v1/menus/expanded',

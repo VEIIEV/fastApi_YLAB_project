@@ -9,6 +9,7 @@ from python_code.dao.redis_dao import RedisDAO
 from python_code.logger import main_logger
 from python_code.schemas.dish_schemas import BaseDish, DishSchema
 from python_code.schemas.menu_schemas import CreateMenu
+from python_code.schemas.submenu_schemas import CreateSubmenu
 
 
 def read_excel():
@@ -86,22 +87,40 @@ def read_excel():
 
 
 async def update_db_from_excel(menus, submenus, dishes, session: AsyncSession, ):
-    await compare_menu(session, menus)
-    return True
+    result = await compare_menu(session, menus)
+    result.append(await compare_submenu(session, submenus))
+    return result
 
 
 async def compare_menu(session: AsyncSession, menus: list[dict]):
     result = []
     for menu in menus:
-        valid_data = CreateMenu.model_validate(menu, strict=False)
+        valid_data: CreateMenu = CreateMenu.model_validate(menu, strict=False)
         menu_from_db = await MC.get_menu_by_id(menu.get('id'), session)
         if menu_from_db is None:
             r = await MC.create_menu(valid_data, session)
             result.append(r)
         else:
-            r = await MC.update_menu_by_id(menu.get('id'), valid_data, session)
+            if (valid_data.title != menu_from_db.title
+                    or valid_data.description != menu_from_db.description):
+                r = await MC.update_menu_by_id(menu.get('id'), valid_data, session)
+                result.append(r)
+    return result
 
+
+async def compare_submenu(session: AsyncSession, submenus: list[dict]):
+    result = []
+    for submenu in submenus:
+        valid_data: CreateSubmenu = CreateSubmenu.model_validate(submenu, strict=False)
+        submenu_from_db = await SC.get_submenu_by_id(submenu.get('id'), session)
+        if submenu_from_db is None:
+            r = await SC.create_submenu(submenu.get('menu_id'), valid_data, session)
             result.append(r)
+        else:
+            if (valid_data.title != submenu_from_db.title
+                    or valid_data.description != submenu_from_db.description):
+                r = await SC.update_submenu_by_id(submenu.get('menu_id'), submenu.get('id'), valid_data, session)
+                result.append(r)
     return result
 
 

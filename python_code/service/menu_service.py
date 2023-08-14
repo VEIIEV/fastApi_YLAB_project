@@ -12,7 +12,7 @@ from python_code.config import settings
 from python_code.cruds import menu_crud as MC
 from python_code.dao.redis_dao import RedisDAO
 from python_code.models.menu_model import Menu
-from python_code.schemas.menu_schemas import CreateMenu, MenuExpandedSchema, MenuSchema
+from python_code.schemas.menu_schemas import CreateMenu, MenuSchema
 from python_code.utils import add_counters_to_response, unvalidate_cache
 
 basepath = ['/api/v1/menus/expandedGET']
