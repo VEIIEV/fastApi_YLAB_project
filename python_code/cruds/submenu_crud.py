@@ -7,7 +7,7 @@ from sqlalchemy.sql.expression import func
 
 from python_code.models.dish_model import Dish
 from python_code.models.submenu_model import Submenu
-from python_code.schemas.submenu_schemas import CreateSubmenu, SubmenuSchema
+from python_code.schemas.submenu_schemas import SubmenuSchema, CreateSubmenu
 
 
 async def get_submenu_all(session: AsyncSession) -> Sequence[SubmenuSchema]:

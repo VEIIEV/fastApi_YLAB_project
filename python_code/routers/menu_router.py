@@ -43,7 +43,7 @@ async def update_db(session: AsyncSession = Depends(get_async_session)):
 
 @router.get('/api/v1/menus/expanded',
             summary='get expanded info about all menu',
-            response_description='The nested list that stores information about all submenus and dishes, '
+            response_description='The nested list that stores information about all dishes and dishes, '
                                  'if empty return []',
             # response_model=list[MenuExpandedSchema]
             )

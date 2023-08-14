@@ -5,11 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
+from python_code.cruds import dish_crud as DC
 from python_code.dao.redis_dao import RedisDAO
 from python_code.logger import main_logger
-from python_code.schemas.dish_schemas import BaseDish, DishSchema
+from python_code.schemas.dish_schemas import BaseDish, DishSchema, CreateDish
 from python_code.schemas.menu_schemas import CreateMenu
 from python_code.schemas.submenu_schemas import CreateSubmenu
+from python_code.schemas.dish_schemas import CreateDish
 
 
 def read_excel():
@@ -62,7 +64,7 @@ def read_excel():
                            and not isinstance(sheet.cell(row=row, column=2).value, str)):  # Блюдо
                         base_price_value = sheet.cell(row=row, column=6).value
                         discount = sheet.cell(row=row, column=7).value if type(
-                            sheet.cell(row=row, column=7).value) == str else 1.0
+                            sheet.cell(row=row, column=7).value) == str else 0.0
                         discount = 1 - float(discount)
                         # price_value = float(base_price_value.replace(',', '.'))
                         price_value = float(base_price_value)
@@ -89,6 +91,7 @@ def read_excel():
 async def update_db_from_excel(menus, submenus, dishes, session: AsyncSession, ):
     result = await compare_menu(session, menus)
     result.append(await compare_submenu(session, submenus))
+    result.append(await compare_dish(session, dishes))
     return result
 
 
@@ -120,6 +123,24 @@ async def compare_submenu(session: AsyncSession, submenus: list[dict]):
             if (valid_data.title != submenu_from_db.title
                     or valid_data.description != submenu_from_db.description):
                 r = await SC.update_submenu_by_id(submenu.get('menu_id'), submenu.get('id'), valid_data, session)
+                result.append(r)
+    return result
+
+
+async def compare_dish(session: AsyncSession, dishes: list[dict]):
+    result = []
+    for dish in dishes:
+        dish['price'] = str(dish['price'])
+        valid_data: CreateDish = CreateDish.model_validate(dish, strict=False)
+        dish_from_db = await DC.get_dish_by_id(dish.get('id'), session)
+        if dish_from_db is None:
+            r = await DC.create_dish(dish.get('submenu_id'), valid_data, session)
+            result.append(r)
+        else:
+            if (valid_data.title != dish_from_db.title
+                    or valid_data.description != dish_from_db.description
+                    or valid_data.price != dish_from_db.price):
+                r = await DC.update_dish_by_id(dish.get('submenu_id'), dish.get('id'), valid_data, session)
                 result.append(r)
     return result
 

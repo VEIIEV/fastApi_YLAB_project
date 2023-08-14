@@ -65,9 +65,9 @@ async def create_dish(request: Request,
     if returned_dish:
         round_price(returned_dish)
         path = [request.url.path + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus/' +
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes/' +
                 str(api_test_submenu_id) + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes' + 'GET',
                 '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
                 '/api/v1/menusGET']
         path += basepath
@@ -90,11 +90,11 @@ async def update_dish(request: Request,
     if updated_dish:
         round_price(updated_dish)
         path = [request.url.path + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus/' + str(
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes/' + str(
                     api_test_submenu_id) + '/dishes' + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus/' +
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes/' +
                 str(api_test_submenu_id) + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes' + 'GET',
                 '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
                 '/api/v1/menusGET']
         path += basepath
@@ -115,11 +115,11 @@ async def delete_dish(request: Request,
     dish = await DC.delete_dish_by_id(api_test_dish_id, session)
     if dish:
         path = [request.url.path + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus/' + str(
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes/' + str(
                     api_test_submenu_id) + '/dishes' + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus/' +
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes/' +
                 str(api_test_submenu_id) + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes' + 'GET',
                 '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
                 '/api/v1/menusGET']
         path += basepath

@@ -83,7 +83,7 @@ async def update_submenu_by_id(request: Request,
     if updated_submenu:
         await add_dish_number_to_submenu(updated_submenu, session)
         path = [request.url.path + 'GET',
-                '/api/v1/menus/' + str(api_test_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(api_test_menu_id) + '/dishes' + 'GET',
                 '/api/v1/menus/' + str(api_test_menu_id) + 'GET',
                 '/api/v1/menusGET']
         path += basepath
@@ -103,7 +103,7 @@ async def delete_submenu_by_id(request: Request,
     submenu = await SC.delete_submenu_by_id(target_submenu_id, session)
     if submenu:
         path = [request.url.path + 'GET',
-                '/api/v1/menus/' + str(target_menu_id) + '/submenus' + 'GET',
+                '/api/v1/menus/' + str(target_menu_id) + '/dishes' + 'GET',
                 '/api/v1/menus/' + str(target_menu_id) + 'GET',
                 '/api/v1/menusGET']
         path += basepath
