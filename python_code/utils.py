@@ -1,7 +1,5 @@
-import asyncio
 import os
 
-import httpx
 import openpyxl
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,8 +7,9 @@ from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
 from python_code.dao.redis_dao import RedisDAO
 from python_code.logger import main_logger
-from python_code.my_celery.celery_main import celery_app
+from python_code.models.menu_model import Menu
 from python_code.schemas.dish_schemas import BaseDish, DishSchema
+from python_code.schemas.menu_schemas import CreateMenu
 
 
 def read_excel():
@@ -38,7 +37,7 @@ def read_excel():
         if (sheet.cell(row=row, column=1).value
                 and type(sheet.cell(row=row, column=1).value) == str):  # Новое меню
             menu = {
-                'uuid': sheet.cell(row=row, column=1).value,
+                'id': sheet.cell(row=row, column=1).value,
                 'title': sheet.cell(row=row, column=2).value,
                 'description': sheet.cell(row=row, column=3).value
             }
@@ -50,10 +49,10 @@ def read_excel():
                 if (sheet.cell(row=row, column=2).value
                         and type(sheet.cell(row=row, column=2).value) == str):
                     submenu = {
-                        'uuid': sheet.cell(row=row, column=2).value,
+                        'id': sheet.cell(row=row, column=2).value,
                         'title': sheet.cell(row=row, column=3).value,
                         'description': sheet.cell(row=row, column=4).value,
-                        'menu_uuid': menu['uuid']
+                        'menu_id': menu['id']
                     }
                     submenus.append(submenu)
                     row += 1
@@ -72,12 +71,12 @@ def read_excel():
                         price_value = price_value * discount
 
                         dish = {
-                            'uuid': sheet.cell(row=row, column=3).value,
+                            'id': sheet.cell(row=row, column=3).value,
                             'title': sheet.cell(row=row, column=4).value,
                             'description': sheet.cell(row=row, column=5).value,
                             'price': price_value,
-                            'submenu_uuid': submenu['uuid'],
-                            'menu_uuid': menu['uuid']  # Добавляем информацию о меню
+                            'submenu_id': submenu['id'],
+                            'menu_id': menu['id']  # Добавляем информацию о меню
                         }
                         dishes.append(dish)
                         row += 1
@@ -89,8 +88,28 @@ def read_excel():
     return menus, submenus, dishes
 
 
-def update_db_from_excel():
-    pass
+async def update_db_from_excel(menus, submenus, dishes, session: AsyncSession, ):
+    await compare_menu(session, menus)
+    return True
+
+
+async def compare_menu(session: AsyncSession, menus: list[dict]):
+    result = []
+    for menu in menus:
+        valid_data = CreateMenu.model_validate(menu, strict=False)
+        print(valid_data)
+        menu_from_db = await MC.get_menu_by_id(menu.get('id'), session)
+        if menu_from_db is None:
+            r = await MC.create_menu(valid_data, session)
+            print(valid_data)
+            result.append(r)
+        else:
+            r = await MC.update_menu_by_id(menu.get('id'), valid_data, session)
+            print(valid_data)
+
+            result.append(r)
+    print(result)
+    return result
 
 
 def round_price(dish: DishSchema | BaseDish | None) -> None:

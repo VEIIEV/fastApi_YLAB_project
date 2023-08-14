@@ -22,10 +22,13 @@ router = APIRouter(
     responses={404: {'details': 'Menu not found'}},
 )
 
+
 # todo delete later
 @router.get('/api/v1/menus/adb')
-def update_db():
-   return read_excel()
+async def update_db(session: AsyncSession = Depends(get_async_session)):
+    menus_data, submenus_data, dishes_data = read_excel()
+    return  await update_db_from_excel(menus_data, submenus_data, dishes_data, session)
+
 
 @router.get('/api/v1/menus/expanded',
             summary='get expanded info about all menu',
