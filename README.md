@@ -19,6 +19,7 @@
   <strong>insert or update on table "submenu" violates foreign key constraint "submenu_menu_id_fkey"\nDETAIL:  
   Key (menu_id)=(0c29b18e-cd6d-465f-9a83-cff925a57186) is not present in table "menu".')</strong>
    ```
+  ![tempsnip.png](attachment%2Ftempsnip.png)
   <br><br>
 - Расширил docker-compose файл, теперь в нем так же есть контейнеры: celery worker, celery beat, rabbitMQ
 - Так же для наглядности работы, реализовал ручку апи которая делает тоже самое, она находится по пути
