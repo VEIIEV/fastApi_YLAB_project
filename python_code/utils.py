@@ -61,8 +61,6 @@ def read_excel():
                            and not isinstance(sheet.cell(row=row, column=1).value, str)
                            and not isinstance(sheet.cell(row=row, column=2).value, str)):  # Блюдо
                         base_price_value = sheet.cell(row=row, column=6).value
-                        t = type(sheet.cell(row=row, column=7).value)
-                        print(t)
                         discount = sheet.cell(row=row, column=7).value if type(
                             sheet.cell(row=row, column=7).value) == str else 1.0
                         discount = 1 - float(discount)
@@ -97,18 +95,14 @@ async def compare_menu(session: AsyncSession, menus: list[dict]):
     result = []
     for menu in menus:
         valid_data = CreateMenu.model_validate(menu, strict=False)
-        print(valid_data)
         menu_from_db = await MC.get_menu_by_id(menu.get('id'), session)
         if menu_from_db is None:
             r = await MC.create_menu(valid_data, session)
-            print(valid_data)
             result.append(r)
         else:
             r = await MC.update_menu_by_id(menu.get('id'), valid_data, session)
-            print(valid_data)
 
             result.append(r)
-    print(result)
     return result
 
 
