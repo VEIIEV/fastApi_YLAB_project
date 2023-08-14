@@ -42,7 +42,7 @@ async def create_submenu_for_test(get_host, create_menu_for_test,
     await async_client.delete(url)
 
 
-@pytest.fixture()
+@pytest.fixture(scope='function')
 async def create_dish_for_test(get_host, create_menu_for_test,
                                create_submenu_for_test,
                                async_client: AsyncClient):

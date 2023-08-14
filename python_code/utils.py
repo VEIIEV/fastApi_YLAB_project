@@ -7,6 +7,7 @@ from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
 from python_code.cruds import dish_crud as DC
 from python_code.dao.redis_dao import RedisDAO
+from python_code.db import Session
 from python_code.logger import main_logger
 from python_code.schemas.dish_schemas import BaseDish, DishSchema, CreateDish
 from python_code.schemas.menu_schemas import CreateMenu
@@ -88,11 +89,12 @@ def read_excel():
     return menus, submenus, dishes
 
 
-async def update_db_from_excel(menus, submenus, dishes, session: AsyncSession, ):
-    result = await compare_menu(session, menus)
-    result.append(await compare_submenu(session, submenus))
-    result.append(await compare_dish(session, dishes))
-    return result
+async def update_db_from_excel(menus, submenus, dishes):
+    async with Session() as session:
+        result = await compare_menu(session, menus)
+        result.append(await compare_submenu(session, submenus))
+        result.append(await compare_dish(session, dishes))
+        return result
 
 
 async def compare_menu(session: AsyncSession, menus: list[dict]):

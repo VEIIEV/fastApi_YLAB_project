@@ -25,11 +25,12 @@ router = APIRouter(
 
 
 # todo delete later
-@router.get('/api/v1/menus/adb')
-async def update_db(session: AsyncSession = Depends(get_async_session)):
+@router.get('/api/v1/menus/adb',
+            summary='sync db with excel')
+async def update_db():
     try:
         menus_data, submenus_data, dishes_data = read_excel()
-        response = await update_db_from_excel(menus_data, submenus_data, dishes_data, session)
+        response = await update_db_from_excel(menus_data, submenus_data, dishes_data)
         print(response)
         return response
     except IntegrityError as e:
