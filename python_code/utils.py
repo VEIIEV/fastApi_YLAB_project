@@ -28,7 +28,7 @@ def read_excel():
     current_directory = os.getcwd()
 
     # Строим путь к файлу относительно текущей директории
-    excel_filepath = os.path.join(current_directory, 'Menu.xlsx')
+    excel_filepath = os.path.join(current_directory, 'admin/' 'Menu.xlsx')
     wb = openpyxl.load_workbook(excel_filepath)
     sheet = wb.active
 
