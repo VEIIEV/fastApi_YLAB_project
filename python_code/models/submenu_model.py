@@ -18,3 +18,6 @@ class Submenu(Base):
     # relationship contain values from other tables related to this one
     dishes: orm.Mapped[list['Dish']] = orm.relationship('Dish', back_populates='submenu')
     menu: orm.Mapped['Menu'] = orm.relationship('Menu', back_populates='submenu')
+
+    def __repr__(self):
+        return f'Submenu(id: {self.id}, title: {self.title}, description: {self.description}, menu_id: {self.menu_id})'

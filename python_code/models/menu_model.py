@@ -19,3 +19,6 @@ class Menu(Base):
     #     sa.func.count(Submenu.id)).where(Submenu.menu_id == id).correlate_except(Submenu).as_scalar()
     #                                              )
     submenu: orm.Mapped[list['Submenu']] = orm.relationship('Submenu', back_populates='menu')
+
+    def __repr__(self):
+        return f'Menu(id: {self.id}, title: {self.title}, description: {self.description})'

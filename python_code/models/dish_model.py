@@ -18,3 +18,6 @@ class Dish(Base):
     submenu_id: orm.Mapped[int] = orm.mapped_column(UUID(as_uuid=True), sa.ForeignKey('submenu.id', ondelete='CASCADE'))
 
     submenu: orm.Mapped['Submenu'] = orm.relationship('Submenu', back_populates='dishes')
+
+    def __repr__(self):
+        return f'Dish(id: {self.id}, title: {self.title}, description: {self.description}, submenu_id: {self.submenu_id})'
