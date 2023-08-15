@@ -94,6 +94,8 @@ async def update_db_from_excel(menus, submenus, dishes):
         result = await compare_menu(session, menus)
         result.append(await compare_submenu(session, submenus))
         result.append(await compare_dish(session, dishes))
+        print('Updated entyties: ')
+        print(result)
         if result == [[],[]]:
             return "DB already updated"
         return result
