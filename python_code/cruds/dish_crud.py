@@ -6,7 +6,7 @@ from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncResult, AsyncSession
 
 from python_code.models.dish_model import Dish
-from python_code.schemas.dish_schemas import CreateDish, DishSchema, CreateDishWithId
+from python_code.schemas.dish_schemas import CreateDish, CreateDishWithId, DishSchema
 
 
 async def get_dish_all(session: AsyncSession) -> list[DishSchema]:
@@ -19,7 +19,7 @@ async def get_dish_for_submenu_all(submenu_id: uuid.UUID, session: AsyncSession)
     return result.scalars().all()
 
 
-async def get_dish_by_id(id: uuid.UUID, session: AsyncSession) -> DishSchema | None:
+async def get_dish_by_id(id: uuid.UUID | None, session: AsyncSession) -> DishSchema | None:
     result = await session.execute(sa.select(Dish).filter_by(id=id))
     return result.scalar()
 
@@ -33,7 +33,7 @@ async def is_exist_dish(title: str, session: AsyncSession) -> bool:
         return False
 
 
-async def create_dish(submenu_id: uuid.UUID, dish: CreateDish | CreateDishWithId,
+async def create_dish(submenu_id: uuid.UUID | None, dish: CreateDish | CreateDishWithId,
                       session: AsyncSession) -> DishSchema | None:
     data = dish.model_dump(exclude_unset=True)
     data['submenu_id'] = submenu_id
@@ -43,8 +43,8 @@ async def create_dish(submenu_id: uuid.UUID, dish: CreateDish | CreateDishWithId
 
 
 # todo чёт тут какая-то ёбань
-async def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish,
-                            session: AsyncSession):
+async def update_dish_by_id(submenu_id: uuid.UUID | None, dish_id: uuid.UUID | None, dish: CreateDishWithId,
+                            session: AsyncSession) -> Dish | None:
     data = dish.model_dump(exclude_unset=True)
     data['submenu_id'] = submenu_id
 

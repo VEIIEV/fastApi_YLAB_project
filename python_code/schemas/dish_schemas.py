@@ -12,6 +12,7 @@ class BaseDish(BaseModel):
 class CreateDish(BaseDish):
     pass
 
+
 class CreateDishWithId(BaseDish):
     id: uuid.UUID
     submenu_id: uuid.UUID

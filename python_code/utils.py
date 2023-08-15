@@ -9,8 +9,9 @@ from python_code.cruds import submenu_crud as SC
 from python_code.dao.redis_dao import RedisDAO
 from python_code.db import Session
 from python_code.logger import main_logger
-from python_code.schemas.dish_schemas import BaseDish, DishSchema
-from python_code.schemas.dish_schemas import CreateDishWithId
+from python_code.models.menu_model import Menu
+from python_code.models.submenu_model import Submenu
+from python_code.schemas.dish_schemas import BaseDish, CreateDishWithId, DishSchema
 from python_code.schemas.menu_schemas import CreateMenuWithId
 from python_code.schemas.submenu_schemas import CreateSubmenuWithId
 
@@ -37,8 +38,8 @@ def read_excel():
 
     row = 1
     while row <= sheet.max_row:
-        if (sheet.cell(row=row, column=1).value
-                and type(sheet.cell(row=row, column=1).value) == str):  # Новое меню
+        if (sheet.cell(row=row, column=1).value and
+                type(sheet.cell(row=row, column=1).value) == str):  # Новое меню
             menu = {
                 'id': sheet.cell(row=row, column=1).value,
                 'title': sheet.cell(row=row, column=2).value,
@@ -47,10 +48,10 @@ def read_excel():
             menus.append(menu)
             row += 1
 
-            while (row <= sheet.max_row
-                   and not type(sheet.cell(row=row, column=1).value) == str):  # Подменю
-                if (sheet.cell(row=row, column=2).value
-                        and type(sheet.cell(row=row, column=2).value) == str):
+            while (row <= sheet.max_row and
+                   not type(sheet.cell(row=row, column=1).value) == str):  # Подменю
+                if (sheet.cell(row=row, column=2).value and
+                        type(sheet.cell(row=row, column=2).value) == str):
                     submenu = {
                         'id': sheet.cell(row=row, column=2).value,
                         'title': sheet.cell(row=row, column=3).value,
@@ -60,9 +61,9 @@ def read_excel():
                     submenus.append(submenu)
                     row += 1
 
-                    while (row <= sheet.max_row
-                           and not isinstance(sheet.cell(row=row, column=1).value, str)
-                           and not isinstance(sheet.cell(row=row, column=2).value, str)):  # Блюдо
+                    while (row <= sheet.max_row and
+                           not isinstance(sheet.cell(row=row, column=1).value, str) and
+                           not isinstance(sheet.cell(row=row, column=2).value, str)):  # Блюдо
                         base_price_value = sheet.cell(row=row, column=6).value
                         discount = sheet.cell(row=row, column=7).value if type(
                             sheet.cell(row=row, column=7).value) == str else 0.0
@@ -96,8 +97,8 @@ async def update_db_from_excel(menus, submenus, dishes):
         result.append(await compare_dish(session, dishes))
         print('Updated entyties: ')
         print(result)
-        if result == [[],[]]:
-            return "DB already updated"
+        if result == [[], []]:
+            return 'DB already updated'
         return result
 
 
@@ -105,13 +106,14 @@ async def compare_menu(session: AsyncSession, menus: list[dict]):
     result = []
     for menu in menus:
         valid_data: CreateMenuWithId = CreateMenuWithId.model_validate(menu, strict=False)
-        menu_from_db = await MC.get_menu_by_id(menu.get('id'), session)
+        menu_from_db: Menu | None = await MC.get_menu_by_id(menu.get('id'), session)
+        r: Menu | None
         if menu_from_db is None:
             r = await MC.create_menu(valid_data, session)
             result.append(r)
         else:
-            if (valid_data.title != menu_from_db.title
-                    or valid_data.description != menu_from_db.description):
+            if (valid_data.title != menu_from_db.title or
+                    valid_data.description != menu_from_db.description):
                 r = await MC.update_menu_by_id(menu.get('id'), valid_data, session)
                 result.append(r)
     return result
@@ -122,12 +124,13 @@ async def compare_submenu(session: AsyncSession, submenus: list[dict]):
     for submenu in submenus:
         valid_data: CreateSubmenuWithId = CreateSubmenuWithId.model_validate(submenu, strict=False)
         submenu_from_db = await SC.get_submenu_by_id(submenu.get('id'), session)
+        r: Submenu | None
         if submenu_from_db is None:
             r = await SC.create_submenu(submenu.get('menu_id'), valid_data, session)
             result.append(r)
         else:
-            if (valid_data.title != submenu_from_db.title
-                    or valid_data.description != submenu_from_db.description):
+            if (valid_data.title != submenu_from_db.title or
+                    valid_data.description != submenu_from_db.description):
                 r = await SC.update_submenu_by_id(submenu.get('menu_id'), submenu.get('id'), valid_data, session)
                 result.append(r)
     return result
@@ -144,9 +147,9 @@ async def compare_dish(session: AsyncSession, dishes: list[dict]):
             r = await DC.create_dish(dish.get('submenu_id'), valid_data, session)
             result.append(r)
         else:
-            if (valid_data.title != dish_from_db.title
-                    or valid_data.description != dish_from_db.description
-                    or valid_data.price != str(dish_from_db.price)):
+            if (valid_data.title != dish_from_db.title or
+                    valid_data.description != dish_from_db.description or
+                    valid_data.price != str(dish_from_db.price)):
                 r = await DC.update_dish_by_id(dish.get('submenu_id'), dish.get('id'), valid_data, session)
                 result.append(r)
     return result

@@ -7,7 +7,11 @@ from sqlalchemy.sql.expression import func
 
 from python_code.models.dish_model import Dish
 from python_code.models.submenu_model import Submenu
-from python_code.schemas.submenu_schemas import SubmenuSchema, CreateSubmenu, CreateSubmenuWithId
+from python_code.schemas.submenu_schemas import (
+    CreateSubmenu,
+    CreateSubmenuWithId,
+    SubmenuSchema,
+)
 
 
 async def get_submenu_all(session: AsyncSession) -> Sequence[SubmenuSchema]:
@@ -20,7 +24,7 @@ async def get_submenu_all_for_menu(menu_id: uuid.UUID, session: AsyncSession) ->
     return result.scalars().all()
 
 
-async def get_submenu_by_id(id: uuid.UUID, session: AsyncSession) -> SubmenuSchema | None:
+async def get_submenu_by_id(id: uuid.UUID | None, session: AsyncSession) -> SubmenuSchema | None:
     result: AsyncResult = await session.execute(sa.select(Submenu).filter_by(id=id))
     # result = await session.execute(select(text('submenu')).where(Submenu.id == id))
     #  query = select(UserQuestionnaire).order_by(UserQuestionnaire.city).fetch(10)
@@ -29,7 +33,7 @@ async def get_submenu_by_id(id: uuid.UUID, session: AsyncSession) -> SubmenuSche
     return result.scalar()
 
 
-async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu | CreateSubmenuWithId,
+async def create_submenu(menu_id: uuid.UUID | None, submenu: CreateSubmenu | CreateSubmenuWithId,
                          session: AsyncSession) -> Submenu | None:
     data = submenu.model_dump(exclude_unset=True)
     data['menu_id'] = menu_id
@@ -39,8 +43,8 @@ async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu | CreateSubm
 
 
 # todo переделать update (наверное)
-async def update_submenu_by_id(menu_id: uuid.UUID, submenu_id: uuid.UUID, submenu: CreateSubmenu,
-                               session: AsyncSession) -> uuid.UUID | None:
+async def update_submenu_by_id(menu_id: uuid.UUID | None, submenu_id: uuid.UUID | None, submenu: CreateSubmenuWithId,
+                               session: AsyncSession) -> Submenu | None:
     data = submenu.model_dump(exclude_unset=True)
     data['menu_id'] = menu_id
     updated_submenu = await session.execute(

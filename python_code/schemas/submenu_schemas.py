@@ -18,6 +18,7 @@ class CreateSubmenuWithId(BaseSubmenu):
     id: uuid.UUID
     menu_id: uuid.UUID = Field(description='ref to his menu')
 
+
 class SubmenuSchema(BaseSubmenu):
     id: uuid.UUID
     menu_id: uuid.UUID = Field(description='ref to his menu')

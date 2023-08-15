@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from redis.asyncio.client import Redis  # type ignore[import]"
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,7 +33,7 @@ async def update_db():
         response = await update_db_from_excel(menus_data, submenus_data, dishes_data)
         print(response)
         return {'list of updated entities:\n': response}
-    except IntegrityError as e:
+    except IntegrityError:
         raise HTTPException(status_code=404,
                             detail='всё впорядке, но есть одно но, uuid генерируется сам собой, и он очевидно не будет совпадать '
                                    'с тем что находится в excel, если хотите что бы оно работало, заходите в excel и ручками прописывайте'

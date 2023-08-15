@@ -10,16 +10,16 @@
 
 - ### Приложение переписано на ассинхронное выполнение
 - ### В проект добавлена фоновая задача с помощью Celery + RabbitMQ, для синхронизаии БД с Excel файлом
-  - цены блюда обрабатывается с учетом скидки на него 
+  - цены блюда обрабатывается с учетом скидки на него
 - ### Также создана ручка, с аналогичным функционалом
 - ### Разделил docker-compose на
   - docker-compose-tests: Содержит приложение и тесты, для запуска используется
     ```sh
-    docker-compose  -f docker-compose-test.yaml up -d   
+    docker-compose  -f docker-compose-test.yaml up -d
     ```
   - docker-compose: Содержит приложение, celery и rabbitMQ
     ```sh
-    docker-compose  -f docker-compose.yaml up -d   
+    docker-compose  -f docker-compose.yaml up -d
     ```
   - Так же для наглядности работы, реализовал ручку апи которая делает тоже самое, она находится по пути
     ```
@@ -60,19 +60,19 @@
 ## * Запуск приложения с celery + rabbitMQ и подделкой на админку
 * ### Выполнить команду, что бы поднять контейнер с приложением
     ```sh
-    docker-compose  -f docker-compose.yaml up -d   
+    docker-compose  -f docker-compose.yaml up -d
     ```
 * После можно зайти в контейнер celery-worker и посмотреть как происходит синхронизация excel и бд
 ![img_2.png](attachment%2Fimg_2.png)
 
 ## * Запуск приложения с тестами
- 
- 
+
+
 * ### Выполнить команду, что бы поднять контейнер с приложением
     ```sh
-    docker-compose  -f docker-compose-test.yaml up -d   
+    docker-compose  -f docker-compose-test.yaml up -d
     ```
-    <i>тесты автоматически начнут выполняться через 10 секунд</i> 
+    <i>тесты автоматически начнут выполняться через 10 секунд</i>
 * ### Выполнить команду, что бы вручную повторно запустить тесты
     ```sh
     docker container start -a tests

@@ -5,7 +5,6 @@ from pathlib import Path
 import httpx
 import pytest
 from dotenv import load_dotenv
-from httpx import AsyncClient
 
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
