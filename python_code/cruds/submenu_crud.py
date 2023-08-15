@@ -7,7 +7,7 @@ from sqlalchemy.sql.expression import func
 
 from python_code.models.dish_model import Dish
 from python_code.models.submenu_model import Submenu
-from python_code.schemas.submenu_schemas import SubmenuSchema, CreateSubmenu
+from python_code.schemas.submenu_schemas import SubmenuSchema, CreateSubmenu, CreateSubmenuWithId
 
 
 async def get_submenu_all(session: AsyncSession) -> Sequence[SubmenuSchema]:
@@ -29,11 +29,10 @@ async def get_submenu_by_id(id: uuid.UUID, session: AsyncSession) -> SubmenuSche
     return result.scalar()
 
 
-async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu, session: AsyncSession) -> Submenu | None:
-    created_submenu = await session.execute(sa.insert(Submenu).returning(Submenu),
-                                            [{'title': submenu.title,
-                                              'description': submenu.description,
-                                              'menu_id': menu_id}])
+async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu | CreateSubmenuWithId,
+                         session: AsyncSession) -> Submenu | None:
+    data = submenu.model_dump(exclude_unset=True)
+    created_submenu = await session.execute(sa.insert(Submenu).returning(Submenu).values(**data))
     await session.commit()
     return created_submenu.scalar()
 
@@ -41,11 +40,9 @@ async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu, session: As
 # todo переделать update (наверное)
 async def update_submenu_by_id(menu_id: uuid.UUID, submenu_id: uuid.UUID, submenu: CreateSubmenu,
                                session: AsyncSession) -> uuid.UUID | None:
+    data = submenu.model_dump(exclude_unset=True)
     updated_submenu = await session.execute(
-        sa.update(Submenu).where(Submenu.id == submenu_id).returning(Submenu).values(
-            title=submenu.title,
-            description=submenu.description,
-            menu_id=menu_id))
+        sa.update(Submenu).where(Submenu.id == submenu_id).returning(Submenu).values(**data))
     await session.commit()
     return updated_submenu.scalar()
 

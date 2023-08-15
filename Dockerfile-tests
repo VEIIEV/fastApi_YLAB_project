@@ -15,4 +15,4 @@ RUN pip install pytest httpx python-dotenv asyncio pytest-asyncio
 
 # Run pytest when the container launches
 
-ENTRYPOINT sleep 10 && pytest
+ENTRYPOINT sleep 20 && pytest

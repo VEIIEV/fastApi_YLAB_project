@@ -15,7 +15,7 @@ async def create_menu_for_test(get_host, async_client: AsyncClient):
             'title': 'My menu 1',
             'description': 'My menu description 1'
         }
-        response: Response = await async_client.post(url=url, json=body)
+        response: Response = await async_client.post(url=url, data=body)
         MENU = response.json()
     print(MENU)
     yield MENU

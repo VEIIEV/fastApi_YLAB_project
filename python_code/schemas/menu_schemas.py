@@ -14,6 +14,10 @@ class CreateMenu(BaseMenu):
     pass
 
 
+class CreateMenuWithId(BaseMenu):
+    id: uuid.UUID
+
+
 class MenuSchema(BaseMenu):
     id: uuid.UUID
     submenu: list[BaseSubmenu] = []

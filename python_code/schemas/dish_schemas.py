@@ -12,6 +12,9 @@ class BaseDish(BaseModel):
 class CreateDish(BaseDish):
     pass
 
+class CreateDishWithId(BaseDish):
+    id: uuid.UUID
+
 
 class DishSchema(BaseDish):
     submenu_id: uuid.UUID = Field(description='ref to his submenu')

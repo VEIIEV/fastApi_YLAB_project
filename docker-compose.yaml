@@ -59,6 +59,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env.no
     command:  celery -A python_code.my_celery.celery_main worker --loglevel=DEBUG
     depends_on:
       - app
@@ -68,6 +70,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env.no
     command:  celery -A python_code.my_celery.celery_main beat --loglevel=DEBUG
     depends_on:
       - app
@@ -80,7 +84,7 @@ services:
       dockerfile: Dockerfile-tests
     container_name: tests
     env_file:
-      - .env
+      - .env.no
     environment:
       - HOST_FOR_TEST=${HOST_FOR_TEST}
     depends_on:

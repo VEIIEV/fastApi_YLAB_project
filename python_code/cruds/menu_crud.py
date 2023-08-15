@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import func
 from python_code.models.dish_model import Dish
 from python_code.models.menu_model import Menu
 from python_code.models.submenu_model import Submenu
-from python_code.schemas.menu_schemas import CreateMenu, MenuSchema
+from python_code.schemas.menu_schemas import CreateMenu, MenuSchema, CreateMenuWithId
 
 
 async def get_menu_all_expanded(session: AsyncSession) -> Sequence[Menu]:
@@ -32,19 +32,18 @@ async def get_menu_by_id(id: uuid.UUID, session: AsyncSession) -> MenuSchema | N
     return result.scalar()
 
 
-async def create_menu(menu: CreateMenu, session: AsyncSession) -> MenuSchema | None:
-    created_menu: AsyncResult = await session.execute(sa.insert(Menu).returning(Menu),
-                                                      [{'title': menu.title, 'description': menu.description}])
+async def create_menu(menu: CreateMenu | CreateMenuWithId, session: AsyncSession) -> MenuSchema | None:
+    data = menu.model_dump(exclude_unset=True)
+    created_menu: AsyncResult = await session.execute(sa.insert(Menu).returning(Menu).values(**data))
     await session.commit()
     return created_menu.scalar()
 
 
 # todo и тут тоже
-async def update_menu_by_id(menu_id: uuid.UUID, menu: CreateMenu, session: AsyncSession):
+async def update_menu_by_id(menu_id: uuid.UUID, menu: CreateMenu | CreateMenuWithId, session: AsyncSession):
+    data = menu.model_dump(exclude_unset=True)
     updated_menu: AsyncResult = await session.execute(
-        sa.update(Menu).where(Menu.id == menu_id).returning(Menu).values(
-            title=menu.title,
-            description=menu.description))
+        sa.update(Menu).where(Menu.id == menu_id).returning(Menu).values(**data))
     await session.commit()
     return updated_menu.scalar()
 

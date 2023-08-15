@@ -3,16 +3,16 @@ import os
 import openpyxl
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from python_code.cruds import dish_crud as DC
 from python_code.cruds import menu_crud as MC
 from python_code.cruds import submenu_crud as SC
-from python_code.cruds import dish_crud as DC
 from python_code.dao.redis_dao import RedisDAO
 from python_code.db import Session
 from python_code.logger import main_logger
-from python_code.schemas.dish_schemas import BaseDish, DishSchema, CreateDish
-from python_code.schemas.menu_schemas import CreateMenu
-from python_code.schemas.submenu_schemas import CreateSubmenu
-from python_code.schemas.dish_schemas import CreateDish
+from python_code.schemas.dish_schemas import BaseDish, DishSchema
+from python_code.schemas.dish_schemas import CreateDishWithId
+from python_code.schemas.menu_schemas import CreateMenuWithId
+from python_code.schemas.submenu_schemas import CreateSubmenuWithId
 
 
 def read_excel():
@@ -100,7 +100,7 @@ async def update_db_from_excel(menus, submenus, dishes):
 async def compare_menu(session: AsyncSession, menus: list[dict]):
     result = []
     for menu in menus:
-        valid_data: CreateMenu = CreateMenu.model_validate(menu, strict=False)
+        valid_data: CreateMenuWithId = CreateMenuWithId.model_validate(menu, strict=False)
         menu_from_db = await MC.get_menu_by_id(menu.get('id'), session)
         if menu_from_db is None:
             r = await MC.create_menu(valid_data, session)
@@ -110,13 +110,14 @@ async def compare_menu(session: AsyncSession, menus: list[dict]):
                     or valid_data.description != menu_from_db.description):
                 r = await MC.update_menu_by_id(menu.get('id'), valid_data, session)
                 result.append(r)
+    print('list of exchange: ' + str(result))
     return result
 
 
 async def compare_submenu(session: AsyncSession, submenus: list[dict]):
     result = []
     for submenu in submenus:
-        valid_data: CreateSubmenu = CreateSubmenu.model_validate(submenu, strict=False)
+        valid_data: CreateSubmenuWithId = CreateSubmenuWithId.model_validate(submenu, strict=False)
         submenu_from_db = await SC.get_submenu_by_id(submenu.get('id'), session)
         if submenu_from_db is None:
             r = await SC.create_submenu(submenu.get('menu_id'), valid_data, session)
@@ -126,6 +127,7 @@ async def compare_submenu(session: AsyncSession, submenus: list[dict]):
                     or valid_data.description != submenu_from_db.description):
                 r = await SC.update_submenu_by_id(submenu.get('menu_id'), submenu.get('id'), valid_data, session)
                 result.append(r)
+    print('list of exchange: ' + str(result))
     return result
 
 
@@ -133,7 +135,7 @@ async def compare_dish(session: AsyncSession, dishes: list[dict]):
     result = []
     for dish in dishes:
         dish['price'] = str(dish['price'])
-        valid_data: CreateDish = CreateDish.model_validate(dish, strict=False)
+        valid_data: CreateDishWithId = CreateDishWithId.model_validate(dish, strict=False)
         dish_from_db = await DC.get_dish_by_id(dish.get('id'), session)
         if dish_from_db is None:
             r = await DC.create_dish(dish.get('submenu_id'), valid_data, session)
@@ -144,6 +146,7 @@ async def compare_dish(session: AsyncSession, dishes: list[dict]):
                     or valid_data.price != dish_from_db.price):
                 r = await DC.update_dish_by_id(dish.get('submenu_id'), dish.get('id'), valid_data, session)
                 result.append(r)
+    print('list of exchange: ' + str(result))
     return result
 
 
