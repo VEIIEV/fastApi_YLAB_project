@@ -15,6 +15,5 @@ def sync_db_with_excel():
     menus_data, submenus_data, dishes_data = read_excel()
     result = loop.run_until_complete(update_db_from_excel(menus_data, submenus_data, dishes_data))
     print(result)
-    print('task complete at' + datetime.now().strftime('%H:%M:%S'))
-    logging.debug('dsdsdsdsdsds\n')
+    print('task complete')
 

@@ -5,22 +5,7 @@
 - Приложение переписано на ассинхронное выполнение
 - В проект добавлена фоновая задача с помощью Celery + RabbitMQ,  ***НОООО***
     - тесты ведут себя не корректно, так как предполагается пустая бд, а она заполняется автоматически с помощью фоновой
-      задчи
-    - на данный момент, он не может адекватно считывать данные, потому что при создание
-      нового объекта в бд, мы создаем объект с рандомным uuid, так как методы не были предназначены на принятие uuid при
-      создании,
-      поэтому что бы увидеть его работу необходимо после создания новых меню в бд в ручную заносить их фактический uuid
-      в excel,=> повторить для подменю,=> повторить для dish
-      ##### Пример ошибки
-  ```
-  [2023-08-14 05:08:59,884: ERROR/ForkPoolWorker-8] 
-  Task python_code.my_celery.tasks.sync_db_with_excel[e40fab14-71b4-4552-b0c0-241cda9db209] 
-  raised unexpected: IntegrityError('(sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class \'asyncpg.exceptions.ForeignKeyViolationError\'>: 
-  <strong>insert or update on table "submenu" violates foreign key constraint "submenu_menu_id_fkey"\nDETAIL:  
-  Key (menu_id)=(0c29b18e-cd6d-465f-9a83-cff925a57186) is not present in table "menu".')</strong>
-   ```
-  ![tempsnip.png](attachment%2Ftempsnip.png)
-  <br><br>
+      задачи
 - Расширил docker-compose файл, теперь в нем так же есть контейнеры: celery worker, celery beat, rabbitMQ
 - Так же для наглядности работы, реализовал ручку апи которая делает тоже самое, она находится по пути
 

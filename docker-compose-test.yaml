@@ -46,33 +46,15 @@ services:
       redis:
         condition: service_started
 
-  rabbitmq:
-    image: "rabbitmq"
-    ports:
-      - "15672:15672"
-      - "5672:5672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
 
-  celery-worker:
+
+  pytest:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-tests
+    container_name: tests
     env_file:
       - .env.no
-    command:  celery -A python_code.my_celery.celery_main worker --loglevel=DEBUG
     depends_on:
-      - app
-      - rabbitmq
-
-  celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env.no
-    command:  celery -A python_code.my_celery.celery_main beat --loglevel=DEBUG
-    depends_on:
-      - app
-      - rabbitmq
+      app:
+        condition: service_started
