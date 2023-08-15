@@ -32,7 +32,7 @@ async def update_db():
         menus_data, submenus_data, dishes_data = read_excel()
         response = await update_db_from_excel(menus_data, submenus_data, dishes_data)
         print(response)
-        return response
+        return {'list of updated entities:\n': response}
     except IntegrityError as e:
         raise HTTPException(status_code=404,
                             detail='всё впорядке, но есть одно но, uuid генерируется сам собой, и он очевидно не будет совпадать '

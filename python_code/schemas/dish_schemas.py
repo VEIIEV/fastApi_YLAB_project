@@ -14,6 +14,7 @@ class CreateDish(BaseDish):
 
 class CreateDishWithId(BaseDish):
     id: uuid.UUID
+    submenu_id: uuid.UUID
 
 
 class DishSchema(BaseDish):

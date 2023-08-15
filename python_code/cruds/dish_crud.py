@@ -6,7 +6,7 @@ from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncResult, AsyncSession
 
 from python_code.models.dish_model import Dish
-from python_code.schemas.dish_schemas import CreateDish, DishSchema
+from python_code.schemas.dish_schemas import CreateDish, DishSchema, CreateDishWithId
 
 
 async def get_dish_all(session: AsyncSession) -> list[DishSchema]:
@@ -33,12 +33,10 @@ async def is_exist_dish(title: str, session: AsyncSession) -> bool:
         return False
 
 
-async def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: AsyncSession) -> DishSchema | None:
-    result: AsyncResult = await session.execute(sa.insert(Dish).returning(Dish),
-                                                [{'title': dish.title,
-                                                  'description': dish.description,
-                                                  'price': dish.price,
-                                                  'submenu_id': submenu_id}])
+async def create_dish(submenu_id: uuid.UUID, dish: CreateDish | CreateDishWithId,
+                      session: AsyncSession) -> DishSchema | None:
+    data = dish.model_dump(exclude_unset=True)
+    result: AsyncResult = await session.execute(sa.insert(Dish).returning(Dish).values(**data))
     await session.commit()
     return result.scalar()
 
@@ -46,11 +44,10 @@ async def create_dish(submenu_id: uuid.UUID, dish: CreateDish, session: AsyncSes
 # todo чёт тут какая-то ёбань
 async def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish,
                             session: AsyncSession):
-    result = await session.execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish).values(
-        title=dish.title,
-        description=dish.description,
-        price=dish.price,
-        submenu_id=submenu_id))
+    data = dish.model_dump(exclude_unset=True)
+
+    result = await session.execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish).
+                                   values(**data))
     await session.commit()
     return result.scalar()
 

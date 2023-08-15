@@ -94,6 +94,8 @@ async def update_db_from_excel(menus, submenus, dishes):
         result = await compare_menu(session, menus)
         result.append(await compare_submenu(session, submenus))
         result.append(await compare_dish(session, dishes))
+        if result == [[],[]]:
+            return "DB already updated"
         return result
 
 
@@ -110,7 +112,6 @@ async def compare_menu(session: AsyncSession, menus: list[dict]):
                     or valid_data.description != menu_from_db.description):
                 r = await MC.update_menu_by_id(menu.get('id'), valid_data, session)
                 result.append(r)
-    print('list of exchange: ' + str(result))
     return result
 
 
@@ -127,13 +128,13 @@ async def compare_submenu(session: AsyncSession, submenus: list[dict]):
                     or valid_data.description != submenu_from_db.description):
                 r = await SC.update_submenu_by_id(submenu.get('menu_id'), submenu.get('id'), valid_data, session)
                 result.append(r)
-    print('list of exchange: ' + str(result))
     return result
 
 
 async def compare_dish(session: AsyncSession, dishes: list[dict]):
     result = []
     for dish in dishes:
+        dish['price'] = round(dish['price'], 2)
         dish['price'] = str(dish['price'])
         valid_data: CreateDishWithId = CreateDishWithId.model_validate(dish, strict=False)
         dish_from_db = await DC.get_dish_by_id(dish.get('id'), session)
@@ -143,10 +144,9 @@ async def compare_dish(session: AsyncSession, dishes: list[dict]):
         else:
             if (valid_data.title != dish_from_db.title
                     or valid_data.description != dish_from_db.description
-                    or valid_data.price != dish_from_db.price):
+                    or valid_data.price != str(dish_from_db.price)):
                 r = await DC.update_dish_by_id(dish.get('submenu_id'), dish.get('id'), valid_data, session)
                 result.append(r)
-    print('list of exchange: ' + str(result))
     return result
 
 
