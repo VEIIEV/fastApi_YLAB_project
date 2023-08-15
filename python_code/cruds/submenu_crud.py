@@ -32,6 +32,7 @@ async def get_submenu_by_id(id: uuid.UUID, session: AsyncSession) -> SubmenuSche
 async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu | CreateSubmenuWithId,
                          session: AsyncSession) -> Submenu | None:
     data = submenu.model_dump(exclude_unset=True)
+    data['menu_id'] = menu_id
     created_submenu = await session.execute(sa.insert(Submenu).returning(Submenu).values(**data))
     await session.commit()
     return created_submenu.scalar()
@@ -41,6 +42,7 @@ async def create_submenu(menu_id: uuid.UUID, submenu: CreateSubmenu | CreateSubm
 async def update_submenu_by_id(menu_id: uuid.UUID, submenu_id: uuid.UUID, submenu: CreateSubmenu,
                                session: AsyncSession) -> uuid.UUID | None:
     data = submenu.model_dump(exclude_unset=True)
+    data['menu_id'] = menu_id
     updated_submenu = await session.execute(
         sa.update(Submenu).where(Submenu.id == submenu_id).returning(Submenu).values(**data))
     await session.commit()

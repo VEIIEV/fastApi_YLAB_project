@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient, Response
 
 # чекер, если меню ещё не создано, то создаем и сохраняем его
@@ -15,7 +16,7 @@ async def create_menu_for_test(get_host, async_client: AsyncClient):
             'title': 'My menu 1',
             'description': 'My menu description 1'
         }
-        response: Response = await async_client.post(url=url, data=body)
+        response: Response = await async_client.post(url=url, json=body)
         MENU = response.json()
     print(MENU)
     yield MENU
@@ -23,11 +24,12 @@ async def create_menu_for_test(get_host, async_client: AsyncClient):
     await async_client.delete(url)
 
 
-@pytest.fixture(scope='function')
+@pytest_asyncio.fixture(scope='function')
 async def create_submenu_for_test(get_host, create_menu_for_test, async_client: AsyncClient):
     # создаем сабменю
     menu_id = create_menu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus'
+    print(url)
     body = {
         'title': 'My submenu 1',
         'description': 'My submenu description 1'
@@ -42,28 +44,31 @@ async def create_submenu_for_test(get_host, create_menu_for_test, async_client: 
 
 # Положительные тесты
 
+@pytest.mark.asyncio
 async def test_get_all_submenu(get_host, create_menu_for_test, async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus'
     print(url)
     response: Response = await async_client.get(url=url)
     assert response.status_code == 200, 'check for status code'
 
 
+@pytest.mark.asyncio
 async def test_get_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test, async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id
     print(url)
     response: Response = await async_client.get(url=url)
     assert response.status_code == 200, 'check for status code'
     assert response.json()['dishes_count'] is not None, 'check for  "dishes_count" field existence'
 
 
+@pytest.mark.asyncio
 async def test_create_submenu(get_host, create_menu_for_test, async_client: AsyncClient):
     # создаем субменю
     menu_id = create_menu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus'
     body = {
         'title': 'My submenu 1',
         'description': 'My submenu description 1'
@@ -78,10 +83,11 @@ async def test_create_submenu(get_host, create_menu_for_test, async_client: Asyn
     await async_client.delete(url)
 
 
+@pytest.mark.asyncio
 async def test_update_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test, async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id
     body = {
         'title': 'My submenu 1',
         'description': 'updated description'
@@ -92,10 +98,11 @@ async def test_update_submenu_by_id(get_host, create_menu_for_test, create_subme
     assert response.json()['dishes_count'] is not None, 'check for  "dishes_count" field existence'
 
 
+@pytest.mark.asyncio
 async def test_delete_submenu_by_id(get_host, create_menu_for_test, create_submenu_for_test, async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id
     response: Response = await async_client.delete(url=url)
     assert response.status_code == 200, 'check for status code'
     assert response.json()['message'] == 'The submenu has been deleted', 'checking for message content'

@@ -36,6 +36,7 @@ async def is_exist_dish(title: str, session: AsyncSession) -> bool:
 async def create_dish(submenu_id: uuid.UUID, dish: CreateDish | CreateDishWithId,
                       session: AsyncSession) -> DishSchema | None:
     data = dish.model_dump(exclude_unset=True)
+    data['submenu_id'] = submenu_id
     result: AsyncResult = await session.execute(sa.insert(Dish).returning(Dish).values(**data))
     await session.commit()
     return result.scalar()
@@ -45,6 +46,7 @@ async def create_dish(submenu_id: uuid.UUID, dish: CreateDish | CreateDishWithId
 async def update_dish_by_id(submenu_id: uuid.UUID, dish_id: uuid.UUID, dish: CreateDish,
                             session: AsyncSession):
     data = dish.model_dump(exclude_unset=True)
+    data['submenu_id'] = submenu_id
 
     result = await session.execute(sa.update(Dish).where(Dish.id == dish_id).returning(Dish).
                                    values(**data))

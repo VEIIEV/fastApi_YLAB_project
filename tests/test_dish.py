@@ -60,6 +60,7 @@ async def create_dish_for_test(get_host, create_menu_for_test,
     await async_client.delete(url)
 
 
+@pytest.mark.asyncio
 async def test_get_all_menu_expanded(get_host, create_menu_for_test,
                                      create_submenu_for_test,
                                      create_dish_for_test,
@@ -72,6 +73,7 @@ async def test_get_all_menu_expanded(get_host, create_menu_for_test,
     assert response.json()[0]['submenu'][0]['dishes'][0]['title'] == 'My dish 1', 'check dishes display correct '
 
 
+@pytest.mark.asyncio
 async def test_get_all_dishes(get_host, create_menu_for_test,
                               create_submenu_for_test,
                               async_client: AsyncClient):
@@ -82,6 +84,7 @@ async def test_get_all_dishes(get_host, create_menu_for_test,
     assert response.status_code == 200, 'check for status code'
 
 
+@pytest.mark.asyncio
 async def test_get_dish_by_id(get_host,
                               create_menu_for_test,
                               create_submenu_for_test,
@@ -95,6 +98,7 @@ async def test_get_dish_by_id(get_host,
     assert response.status_code == 200, 'check for status code'
 
 
+@pytest.mark.asyncio
 async def test_create_dish(get_host, create_menu_for_test,
                            create_submenu_for_test,
                            async_client: AsyncClient):
@@ -116,6 +120,7 @@ async def test_create_dish(get_host, create_menu_for_test,
     await async_client.delete(url)
 
 
+@pytest.mark.asyncio
 async def test_update_dish(get_host, create_menu_for_test,
                            create_submenu_for_test,
                            create_dish_for_test,
@@ -136,6 +141,7 @@ async def test_update_dish(get_host, create_menu_for_test,
     assert response.json()['price'] == body['price'], 'check for retrieved submenu(price) accordance'
 
 
+@pytest.mark.asyncio
 async def test_delete_dish(get_host, create_menu_for_test,
                            create_submenu_for_test,
                            create_dish_for_test,

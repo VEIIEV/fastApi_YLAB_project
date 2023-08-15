@@ -2,6 +2,7 @@ import asyncio
 import os
 from pathlib import Path
 
+import httpx
 import pytest
 from dotenv import load_dotenv
 from httpx import AsyncClient
@@ -18,9 +19,8 @@ def get_host():
 
 @pytest.fixture(scope='session')
 async def async_client():
-    client = AsyncClient()
-    yield client
-    await client.aclose()
+    async with httpx.AsyncClient() as client:
+        yield client
 
 
 # нужно что бы области видимости фикстур нормально отрабатывали
