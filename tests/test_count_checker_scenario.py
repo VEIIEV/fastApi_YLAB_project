@@ -11,7 +11,7 @@ async def test_counter_scenario(get_host, async_client: AsyncClient):
     assert response_menu.status_code == 201, 'check for menu creation status code'
 
     menu_id = response_menu.json()['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus'
     body = {
         'title': 'My submenu 1',
         'description': 'My submenu description 1'
@@ -20,7 +20,7 @@ async def test_counter_scenario(get_host, async_client: AsyncClient):
     assert response_submenu.status_code == 201, 'check for submenu creation status code'
 
     submenu_id = response_submenu.json()['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id + '/dishes'
     body = {
         'title': 'My dish 1',
         'description': 'My dish description 1',
@@ -43,11 +43,11 @@ async def test_counter_scenario(get_host, async_client: AsyncClient):
     assert checker_for_menu.json()['dishes_count'] == 2
 
     checker_for_submenu: Response = await async_client.get(
-        url=get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id)
+        url=get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id)
     assert checker_for_submenu.status_code == 200, 'check for counter with  2dish'
     assert checker_for_submenu.json()['dishes_count'] == 2
 
-    await async_client.delete(url=get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id)
+    await async_client.delete(url=get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id)
     checker: Response = await async_client.get(response_menu.url)
     assert checker.status_code == 200
     checker2: Response = await async_client.get(response_submenu.url)

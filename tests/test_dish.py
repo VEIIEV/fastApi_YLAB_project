@@ -29,7 +29,7 @@ async def create_submenu_for_test(get_host, create_menu_for_test,
                                   async_client: AsyncClient):
     global SUBMENU
     menu_id = create_menu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus'
     if not SUBMENU:
         body = {
             'title': 'My submenu 1',
@@ -48,7 +48,7 @@ async def create_dish_for_test(get_host, create_menu_for_test,
                                async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id + '/dishes'
     body = {
         'title': 'My dish 1',
         'description': 'My dish description 1',
@@ -79,7 +79,7 @@ async def test_get_all_dishes(get_host, create_menu_for_test,
                               async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id + '/dishes'
     response: Response = await async_client.get(url=url)
     assert response.status_code == 200, 'check for status code'
 
@@ -93,7 +93,7 @@ async def test_get_dish_by_id(get_host,
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
     dish_id = create_dish_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id + '/dishes/' + dish_id
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id + '/dishes/' + dish_id
     response: Response = await async_client.get(url=url)
     assert response.status_code == 200, 'check for status code'
 
@@ -104,7 +104,7 @@ async def test_create_dish(get_host, create_menu_for_test,
                            async_client: AsyncClient):
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id + '/dishes'
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id + '/dishes'
     body = {
         'title': 'My dish 1',
         'description': 'My dish description 1',
@@ -128,7 +128,7 @@ async def test_update_dish(get_host, create_menu_for_test,
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
     dish_id = create_dish_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id + '/dishes/' + dish_id
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id + '/dishes/' + dish_id
     body = {
         'title': 'My dish 1',
         'description': 'My dish description 1',
@@ -149,7 +149,7 @@ async def test_delete_dish(get_host, create_menu_for_test,
     menu_id = create_menu_for_test['id']
     submenu_id = create_submenu_for_test['id']
     dish_id = create_dish_for_test['id']
-    url = get_host + '/api/v1/menus/' + menu_id + '/dishes/' + submenu_id + '/dishes/' + dish_id
+    url = get_host + '/api/v1/menus/' + menu_id + '/submenus/' + submenu_id + '/dishes/' + dish_id
     response: Response = await async_client.delete(url=url)
     assert response.status_code == 200, 'check for status code'
     assert response.json()['message'] == 'The dish has been deleted', 'checking for message content'
